@@ -1,0 +1,54 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tw-stock-radar"
+version = "1.0.0"
+description = "Free Taiwan stock market scanner — institutional chips + 13 technicals + AI signals, 1800+ stocks"
+readme = "README_EN.md"
+license = {text = "MIT"}
+requires-python = ">=3.9"
+keywords = ["taiwan", "stock", "trading", "algorithmic-trading", "quantitative-finance", "twse", "scanner"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Topic :: Office/Business :: Financial :: Investment",
+]
+dependencies = [
+    "python-dotenv>=1.0.0",
+    "httpx>=0.27.0",
+    "yfinance>=0.2.40",
+    "pandas>=2.0.0",
+    "numpy>=1.26.0",
+    "twstock>=1.3.1",
+    "openai>=1.30.0",
+]
+
+[[project.authors]]
+name = "Carson Chou"
+email = "moneycometomywallet@gmail.com"
+
+[project.urls]
+Homepage = "https://github.com/carsonchou/tw-stock-radar"
+Repository = "https://github.com/carsonchou/tw-stock-radar"
+
+[project.scripts]
+tw-stock-radar = "tw_stock_radar.__main__:main"
+
+[tool.setuptools]
+include-package-data = true
+py-modules = [
+    "app", "scan", "chips", "analyst", "indicators",
+    "notify", "universe", "validate", "snapshot", "calibrate",
+    "tdcc", "margin", "daily_post", "auto_eod", "team_server",
+    "track", "news", "twse_price", "query", "fundamentals",
+    "health", "realtime_quote", "zones", "server", "eod", "loop",
+]
+
+[tool.setuptools.packages.find]
+include = ["tw_stock_radar*"]
+
+[tool.setuptools.package-data]
+"*" = ["*.html", "*.js", "*.json", "*.txt", "*.md"]

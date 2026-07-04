@@ -1,11 +1,12 @@
 # tw-stock-radar 🎯
 
 ![Python](https://img.shields.io/badge/Python-3.9+-blue?logo=python&logoColor=white)
+![PyPI](https://img.shields.io/pypi/v/tw-stock-radar?color=blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
-![Tests](https://img.shields.io/badge/Tests-~100%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/Tests-109%20passing-brightgreen)
 ![Data](https://img.shields.io/badge/Data-100%25%20free%20open%20data-orange)
 
-**AI-powered Taiwan stock scanner** — full-market chips, technicals, fundamentals, and AI analyst signals in a dark Iron Man HUD dashboard. 100% free open data. No API key required for core features.
+**Free Python scanner for all 1,800+ TWSE/TPEX stocks** — institutional chips, 13 technicals, fundamentals, and AI analyst deep-dives in a dark HUD dashboard. No API key required for core features.
 
 > Scans all 1,800+ TWSE + TPEX listed stocks. Used daily in production.
 
@@ -15,11 +16,16 @@
 
 ## Screenshots
 
-![Dashboard — Market Radar & Sector Rotation](docs/screenshot-dashboard.png)
-*Main dashboard: market temperature gauge, sector rotation heatmap, live signal cards*
+![Dashboard Live — market temperature, sector rotation, signal cards](docs/demo-radar.gif)
 
-![Chips Flow — Institutional & Margin Data](docs/screenshot-chips.png)
-*Chips tab: foreign/trust net buy rankings, consecutive buy streaks, margin & day-trade ratios*
+![Market Radar — temperature gauge, sector rotation heatmap, signal cards](docs/screenshot-dashboard.png)
+*Market temperature 54.6 (neutral), sector rotation heatmap, live buy/sell signal cards with stop-loss and TP levels*
+
+![Institutional Chips — foreign & trust net buy rankings, consecutive buy streaks](docs/screenshot-chips.png)
+*T-1 institutional data: TWSE T86 foreign/trust/dealer net buy rankings, consecutive buy streak counter*
+
+![Track Record — real win rate and R-multiple from live signals](docs/screenshot-sector.png)
+*Real post-signal tracking: actual entry→exit prices, P&L%, and R-multiple from live data — not backtest*
 
 ---
 
@@ -60,12 +66,19 @@ Retail outflow + institutional accumulation = classic smart money setup.
 
 ## Quick Start
 
+**Option A — pip install (recommended):**
+```bash
+pip install tw-stock-radar
+tw-stock-radar          # → http://localhost:8899
+```
+
+**Option B — from source:**
 ```bash
 git clone https://github.com/carsonchou/tw-stock-radar
 cd tw-stock-radar
 pip install -r requirements.txt
-cp .env.example .env       # optional: add keys for AI panel and push alerts
-python app.py              # → http://localhost:8000
+cp .env.example .env
+python app.py           # → http://localhost:8899
 ```
 
 End-of-day full pipeline (chips → scan → notify):

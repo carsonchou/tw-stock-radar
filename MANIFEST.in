@@ -1,0 +1,4 @@
+include *.html
+include *.js
+include .env.example
+include requirements.txt

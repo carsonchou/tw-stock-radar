@@ -16,3 +16,7 @@ state_zones.json
 history.json
 signals_book.json
 posts/
+dist/
+build/
+*.egg-info/
+

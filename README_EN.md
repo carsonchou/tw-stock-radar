@@ -7,9 +7,9 @@
 ![Data](https://img.shields.io/badge/Data-100%25%20free%20open%20data-orange)
 ![Tests](https://github.com/carsonchou/tw-stock-radar/actions/workflows/test.yml/badge.svg)
 
-**Free Python scanner for all 1,800+ TWSE/TPEX stocks** — institutional chips, 13 technicals, fundamentals, and AI analyst deep-dives in a dark HUD dashboard. No API key required for core features.
+**Free Python scanner for all 1,900+ TWSE/TPEX stocks** — institutional chips, 13 technicals, fundamentals, and AI analyst deep-dives in a dark HUD dashboard. No API key required for core features.
 
-> Scans all 1,800+ TWSE + TPEX listed stocks. Used daily in production.
+> Scans all 1,900+ TWSE + TPEX listed stocks. Used daily in production.
 
 [繁體中文 README](README.md)
 

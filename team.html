@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>金融分析團隊 · 台股監控</title>
+<style>
+:root{
+  --bg:#090d18;--bg2:#0f1624;--bg3:#141d2e;--bg4:#1a2540;
+  --border:#1e2d48;--border2:#2a3a58;
+  --text:#d0e0f8;--text2:#8aa0c0;--text3:#4a5a78;
+  --blue:#3b8ef3;--cyan:#4fd1c5;--orange:#f6ad55;--red:#fc8181;--green:#68d391;
+  --zhu:#4fd1c5;--asp:#f6ad55;--war:#fc8181;--zha:#68d391;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:15px;height:100vh;overflow:hidden;display:flex;flex-direction:column;user-select:none}
+
+/* ── 頂欄 ── */
+header{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 14px;height:48px;display:flex;align-items:center;gap:10px;flex-shrink:0;min-width:0}
+.logo{font-size:16px;font-weight:700;color:var(--blue);letter-spacing:.3px;white-space:nowrap;flex-shrink:0}
+.logo span{color:var(--text2);font-weight:400;font-size:12px;margin-left:6px}
+.spacer{flex:1;min-width:0}
+.ts{color:var(--text3);font-size:11px;white-space:nowrap;flex-shrink:0}
+.temp-badge{padding:4px 10px;border-radius:12px;font-size:12px;font-weight:600;background:#1a2540;color:var(--cyan);white-space:nowrap;flex-shrink:0}
+.mkt-badge{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text2);white-space:nowrap;flex-shrink:0}
+.mkt-dot{width:7px;height:7px;border-radius:50%;background:var(--text3)}
+.mkt-dot.up{background:var(--green);box-shadow:0 0 5px var(--green)}
+.mkt-dot.dn{background:var(--red);box-shadow:0 0 5px var(--red)}
+#scan-btn{background:var(--blue);color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:13px;font-weight:600;cursor:pointer;transition:.15s;white-space:nowrap;flex-shrink:0}
+#scan-btn:hover{background:#5ba0ff}
+#scan-btn:disabled{opacity:.5;cursor:default}
+
+/* ── 分頁切換 ── */
+.tab-bar{background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:4px;padding:0 14px;height:36px;flex-shrink:0}
+.tab-btn{padding:6px 16px;border-radius:6px 6px 0 0;font-size:13px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--text2);transition:.15s;text-decoration:none;display:flex;align-items:center;gap:6px}
+.tab-btn:hover{color:var(--text);background:var(--bg3)}
+.tab-btn.active{color:var(--cyan);background:var(--bg3);border-bottom:2px solid var(--cyan)}
+
+/* ── 拖曳三欄 ── */
+.main{display:flex;flex:1;overflow:hidden}
+.col{overflow-y:auto;overflow-x:hidden;padding:14px}
+.col-left{background:var(--bg2);border-right:1px solid var(--border);width:250px;min-width:180px;max-width:55%;flex-shrink:0}
+.col-mid{background:var(--bg);flex:1;min-width:220px}
+.col-right{background:var(--bg2);border-left:1px solid var(--border);width:360px;min-width:240px;max-width:60%;flex-shrink:0;display:flex;flex-direction:column;padding:0;overflow:hidden}
+
+.divider{width:5px;background:var(--border);cursor:col-resize;flex-shrink:0;transition:background .15s}
+.divider:hover,.divider.active{background:var(--blue)}
+
+/* ── 師父面板 ── */
+.panel{background:var(--bg3);border:1px solid var(--border);border-radius:10px;margin-bottom:12px;overflow:hidden}
+.panel-hd{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--border)}
+.avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0}
+.panel-name{font-size:15px;font-weight:700}
+.panel-sub{font-size:12px;color:var(--text3);margin-top:2px}
+.panel-score{margin-left:auto;font-size:24px;font-weight:700;min-width:36px;text-align:right}
+.score-bar{height:4px;background:var(--bg4)}
+.score-fill{height:100%;transition:.5s}
+.panel-bd{padding:10px 14px}
+.signal-item{font-size:13px;color:var(--text2);padding:3px 0;line-height:1.5}
+.signal-item.hit{color:var(--text)}
+.signal-item.empty{color:var(--text3);font-style:italic}
+
+/* ── 市場欄 ── */
+.section-title{font-size:12px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin:0 0 10px;display:flex;align-items:center;gap:8px}
+.section-title::after{content:'';flex:1;height:1px;background:var(--border)}
+
+.gauge-box{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:18px;margin-bottom:14px}
+.gauge-row{display:flex;align-items:center;gap:18px}
+.gauge-num{font-size:48px;font-weight:700;color:var(--cyan);line-height:1;min-width:68px}
+.gauge-meta{flex:1}
+.gauge-label{font-size:17px;font-weight:700;margin-bottom:8px}
+.gauge-bar{height:7px;background:var(--bg4);border-radius:4px;overflow:hidden;margin-bottom:10px}
+.gauge-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--blue),var(--cyan));transition:.6s}
+.gauge-stats{display:grid;grid-template-columns:1fr 1fr;gap:5px 16px}
+.gauge-stat{font-size:13px;color:var(--text2)}
+.gauge-stat span{color:var(--text);font-weight:600}
+
+.sig-list{display:flex;flex-direction:column;gap:7px;margin-bottom:16px}
+.sig-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:11px 13px;cursor:pointer;transition:.15s;display:flex;align-items:center;gap:10px}
+.sig-card:hover{border-color:var(--border2);background:var(--bg3);transform:translateX(2px)}
+.sig-side{width:4px;height:42px;border-radius:2px;flex-shrink:0}
+.sig-side.long{background:var(--green)}
+.sig-side.short{background:var(--red)}
+.sig-side.watch{background:var(--orange)}
+.sig-body{flex:1;min-width:0}
+.sig-top{display:flex;align-items:center;gap:7px;margin-bottom:3px;flex-wrap:wrap}
+.sig-code{font-size:16px;font-weight:700}
+.sig-name{font-size:13px;color:var(--text2)}
+.sig-reason{font-size:12px;color:var(--text3);overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.sig-score{font-size:20px;font-weight:700;color:var(--cyan);min-width:38px;text-align:right}
+.sig-badge{font-size:10px;padding:2px 6px;border-radius:8px;font-weight:600}
+.sig-badge.kd{background:#1a3040;color:var(--cyan)}
+.sig-badge.bald{background:#2d1a0a;color:var(--orange)}
+
+/* ── 右欄分析 ── */
+.analyzer-hd{padding:14px 16px;border-bottom:1px solid var(--border);flex-shrink:0}
+.analyzer-hd-title{font-size:14px;font-weight:700;color:var(--text2);margin-bottom:10px}
+.input-row{display:flex;gap:8px}
+#code-input{flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:10px 13px;font-size:16px;outline:none;transition:.15s}
+#code-input:focus{border-color:var(--blue);box-shadow:0 0 0 2px rgba(59,142,243,.15)}
+#analyze-btn{background:var(--blue);color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:15px;font-weight:600;cursor:pointer;transition:.15s;white-space:nowrap}
+#analyze-btn:hover{background:#5ba0ff}
+#analyze-btn:disabled{opacity:.5;cursor:default}
+.analyzer-bd{flex:1;overflow-y:auto;padding:14px}
+
+.result-header{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin-bottom:12px}
+.result-title{font-size:18px;font-weight:700}
+.result-sub{font-size:12px;color:var(--text2);margin-top:4px}
+.total-score{font-size:42px;font-weight:700;color:var(--cyan);margin:10px 0 4px;line-height:1}
+.total-score span{font-size:17px;color:var(--text2);font-weight:400}
+.rec-text{font-size:16px;font-weight:700;margin-bottom:12px}
+.dim-bars{display:flex;flex-direction:column;gap:7px}
+.dim-row{display:flex;align-items:center;gap:10px}
+.dim-label{width:74px;font-size:13px;color:var(--text2);flex-shrink:0}
+.dim-bar{flex:1;height:8px;background:var(--bg4);border-radius:4px;overflow:hidden}
+.dim-fill{height:100%;border-radius:4px;transition:.5s}
+.dim-val{width:28px;font-size:14px;font-weight:600;text-align:right;flex-shrink:0}
+.confirm-line{margin-top:10px;font-size:13px;color:var(--text3)}
+
+.view-card{background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:13px 15px;margin-bottom:9px}
+.view-hd{display:flex;align-items:center;gap:10px;margin-bottom:7px}
+.view-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.view-name{font-size:15px;font-weight:700;flex:1}
+.view-score{font-size:20px;font-weight:700}
+.view-verdict{font-size:14px;color:var(--text2);margin-bottom:7px;font-weight:600}
+.view-notes{display:flex;flex-direction:column;gap:4px}
+.view-note{font-size:13px;color:var(--text3);line-height:1.5}
+.view-note.pos{color:var(--green)}
+.view-note.neg{color:var(--red)}
+.view-note.warn{color:var(--orange)}
+
+/* ── 操作區間 ── */
+.zone-box{background:var(--bg4);border:1px solid var(--border2);border-radius:7px;padding:9px 12px;margin-top:8px;display:flex;flex-direction:column;gap:5px}
+.zone-title{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:2px}
+.zone-row{display:flex;align-items:center;gap:8px}
+.zone-label{font-size:11px;color:var(--text3);width:28px;flex-shrink:0}
+.zone-val{font-size:14px;font-weight:700}
+.zone-val.entry{color:var(--cyan)}
+.zone-val.stop{color:var(--red)}
+.zone-val.target{color:var(--green)}
+.zone-rr{font-size:11px;color:var(--text2);margin-left:auto}
+.zone-bar{height:6px;background:var(--bg);border-radius:3px;overflow:visible;position:relative;margin:2px 0 4px}
+.zone-bar-stop{position:absolute;height:100%;background:var(--red);border-radius:3px 0 0 3px;opacity:.6}
+.zone-bar-entry{position:absolute;height:100%;background:var(--cyan);opacity:.8}
+.zone-bar-t1{position:absolute;height:100%;background:var(--green);border-radius:0 3px 3px 0;opacity:.5}
+.zone-bar-marker{position:absolute;top:-3px;width:2px;height:12px;border-radius:1px;background:var(--text)}
+.zone-no{font-size:12px;color:var(--text3);font-style:italic;margin-top:6px}
+
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;height:260px;color:var(--text3);gap:12px}
+.empty-icon{font-size:44px;opacity:.3}
+.empty-txt{font-size:15px}
+.empty-sub{font-size:13px;color:var(--text3)}
+.loading{display:flex;align-items:center;justify-content:center;height:110px;gap:10px;color:var(--text2);font-size:15px}
+.spinner{width:20px;height:20px;border:2px solid var(--border2);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+</style>
+</head>
+<body>
+
+<header>
+  <span class="logo">金融分析團隊<span>台股市場監控</span></span>
+  <div class="mkt-badge"><span class="mkt-dot" id="mkt-dot"></span><span id="mkt-label">—</span></div>
+  <div class="temp-badge" id="temp-badge">溫度 —</div>
+  <span class="spacer"></span>
+  <span class="ts" id="ts">—</span>
+  <button id="scan-btn" onclick="triggerScan()">⚡ 掃描宇宙</button>
+</header>
+
+<div class="tab-bar">
+  <a class="tab-btn" href="/market">📡 數據獵手</a>
+  <a class="tab-btn active" href="/">🧑‍💼 分析團隊</a>
+</div>
+
+<div class="main" id="main">
+  <!-- 左欄 -->
+  <div class="col col-left" id="col-left">
+    <div class="panel">
+      <div class="panel-hd">
+        <div class="avatar" style="background:#0e2830;color:var(--zhu)">朱</div>
+        <div><div class="panel-name" style="color:var(--zhu)">朱家泓</div><div class="panel-sub">KD技術三招</div></div>
+        <div class="panel-score" id="zhu-score" style="color:var(--zhu)">—</div>
+      </div>
+      <div class="score-bar"><div class="score-fill" id="zhu-bar" style="background:var(--zhu);width:0"></div></div>
+      <div class="panel-bd" id="zhu-hits"><div class="signal-item empty">載入中…</div></div>
+    </div>
+    <div class="panel">
+      <div class="panel-hd">
+        <div class="avatar" style="background:#2a1e0a;color:var(--asp)">阿</div>
+        <div><div class="panel-name" style="color:var(--asp)">阿斯匹靈</div><div class="panel-sub">投信作帳法</div></div>
+        <div class="panel-score" id="asp-score" style="color:var(--asp)">—</div>
+      </div>
+      <div class="score-bar"><div class="score-fill" id="asp-bar" style="background:var(--asp);width:0"></div></div>
+      <div class="panel-bd" id="asp-hits"><div class="signal-item empty">載入中…</div></div>
+    </div>
+    <div class="panel">
+      <div class="panel-hd">
+        <div class="avatar" style="background:#2a1010;color:var(--war)">權</div>
+        <div><div class="panel-name" style="color:var(--war)">權證小哥</div><div class="panel-sub">K棒主力追蹤</div></div>
+        <div class="panel-score" id="war-score" style="color:var(--war)">—</div>
+      </div>
+      <div class="score-bar"><div class="score-fill" id="war-bar" style="background:var(--war);width:0"></div></div>
+      <div class="panel-bd" id="war-hits"><div class="signal-item empty">載入中…</div></div>
+    </div>
+    <div class="panel">
+      <div class="panel-hd">
+        <div class="avatar" style="background:#0a2015;color:var(--zha)">張</div>
+        <div><div class="panel-name" style="color:var(--zha)">張捷</div><div class="panel-sub">產業強弱分析</div></div>
+        <div class="panel-score" id="zha-score" style="color:var(--zha)">—</div>
+      </div>
+      <div class="score-bar"><div class="score-fill" id="zha-bar" style="background:var(--zha);width:0"></div></div>
+      <div class="panel-bd" id="zha-hits"><div class="signal-item empty">載入中…</div></div>
+    </div>
+  </div>
+
+  <div class="divider" id="div-L"></div>
+
+  <!-- 中欄 -->
+  <div class="col col-mid" id="col-mid">
+    <div class="section-title">市場溫度計</div>
+    <div class="gauge-box">
+      <div class="gauge-row">
+        <div class="gauge-num" id="g-temp">—</div>
+        <div class="gauge-meta">
+          <div class="gauge-label" id="g-label">—</div>
+          <div class="gauge-bar"><div class="gauge-fill" id="g-bar" style="width:0"></div></div>
+          <div class="gauge-stats">
+            <div class="gauge-stat">漲 <span id="g-adv">—</span></div>
+            <div class="gauge-stat">跌 <span id="g-dec">—</span></div>
+            <div class="gauge-stat">MA20 <span id="g-breadth">—</span>%</div>
+            <div class="gauge-stat">RSI <span id="g-rsi">—</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">做多訊號</div>
+    <div class="sig-list" id="long-list"><div class="signal-item empty">載入中…</div></div>
+
+    <div class="section-title">觀察名單</div>
+    <div class="sig-list" id="watch-list"><div class="signal-item empty">載入中…</div></div>
+
+    <div class="section-title">做空警示</div>
+    <div class="sig-list" id="short-list"><div class="signal-item empty">—</div></div>
+  </div>
+
+  <div class="divider" id="div-R"></div>
+
+  <!-- 右欄 -->
+  <div class="col col-right" id="col-right">
+    <div class="analyzer-hd">
+      <div class="analyzer-hd-title">四維度個股分析</div>
+      <div class="input-row">
+        <input id="code-input" type="text" placeholder="代號，如 2330" maxlength="6"
+               onkeydown="if(event.key==='Enter')doAnalyze()">
+        <button id="analyze-btn" onclick="doAnalyze()">分析</button>
+      </div>
+    </div>
+    <div class="analyzer-bd" id="analyzer-bd">
+      <div class="empty-state">
+        <div class="empty-icon">📊</div>
+        <div class="empty-txt">輸入股票代號開始分析</div>
+        <div class="empty-sub">結合四位老師視角・加權評分</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── 拖曳調整欄寬 ────────────────────────────────────────────
+(function(){
+  const main = document.getElementById('main');
+  const colL = document.getElementById('col-left');
+  const colR = document.getElementById('col-right');
+  const divL = document.getElementById('div-L');
+  const divR = document.getElementById('div-R');
+
+  function drag(divider, onMove){
+    let active = false, startX = 0;
+    divider.addEventListener('mousedown', e => {
+      active = true; startX = e.clientX;
+      divider.classList.add('active');
+      document.body.style.cursor = 'col-resize';
+      e.preventDefault();
+    });
+    document.addEventListener('mousemove', e => {
+      if(!active) return;
+      onMove(e.clientX - startX, e.clientX);
+      startX = e.clientX;
+    });
+    document.addEventListener('mouseup', () => {
+      if(!active) return;
+      active = false;
+      divider.classList.remove('active');
+      document.body.style.cursor = '';
+    });
+  }
+
+  drag(divL, (delta) => {
+    const w = Math.max(180, Math.min(colL.offsetWidth + delta, main.offsetWidth * .5));
+    colL.style.width = w + 'px';
+  });
+
+  drag(divR, (delta) => {
+    const w = Math.max(240, Math.min(colR.offsetWidth - delta, main.offsetWidth * .6));
+    colR.style.width = w + 'px';
+  });
+})();
+
+// ── 常數 ────────────────────────────────────────────────────
+const COLORS = {'朱家泓':'var(--zhu)','阿斯匹靈':'var(--asp)','權證小哥':'var(--war)','張捷':'var(--zha)'};
+
+// ── 資料 ────────────────────────────────────────────────────
+async function loadState(){
+  try{ const r = await fetch('/state.json?t='+Date.now()); return r.ok ? await r.json() : null; }
+  catch{ return null; }
+}
+
+function updateHeader(st){
+  if(!st||!st.ok) return;
+  const g = st.gauge||{}, idx = st.index||{};
+  document.getElementById('ts').textContent = '更新 '+(st.ts||'').slice(11,16);
+  document.getElementById('temp-badge').textContent = `溫度 ${g.temperature} ${g.label}`;
+  document.getElementById('g-temp').textContent = g.temperature;
+  document.getElementById('g-label').textContent = g.label;
+  document.getElementById('g-bar').style.width = (g.temperature||0)+'%';
+  document.getElementById('g-adv').textContent = g.adv||'—';
+  document.getElementById('g-dec').textContent = g.dec||'—';
+  document.getElementById('g-breadth').textContent = g.breadth||'—';
+  document.getElementById('g-rsi').textContent = g.avg_rsi||'—';
+  const dot = document.getElementById('mkt-dot');
+  dot.className = 'mkt-dot '+(idx.trend==='UP'?'up':idx.trend==='DOWN'?'dn':'');
+  document.getElementById('mkt-label').textContent =
+    idx.price ? `0050 ${idx.price} ${idx.trend==='UP'?'▲':'▼'}` : '大盤 —';
+}
+
+function makeSigCard(s, side){
+  const card = document.createElement('div'); card.className = 'sig-card';
+  card.onclick = () => { document.getElementById('code-input').value = s.code; doAnalyze(); };
+  const bar = document.createElement('div'); bar.className = `sig-side ${side}`;
+  const body = document.createElement('div'); body.className = 'sig-body';
+  const top = document.createElement('div'); top.className = 'sig-top';
+  const code = document.createElement('span'); code.className = 'sig-code'; code.textContent = s.code;
+  const name = document.createElement('span'); name.className = 'sig-name'; name.textContent = s.name||'';
+  top.append(code, name);
+  if(s.kd_golden){ const b = document.createElement('span'); b.className='sig-badge kd'; b.textContent='KD↑'; top.appendChild(b); }
+  if(s.bald_red_k){ const b = document.createElement('span'); b.className='sig-badge bald'; b.textContent='⚡紅K'; top.appendChild(b); }
+  const reason = document.createElement('div'); reason.className = 'sig-reason'; reason.textContent = s.reason||'';
+  body.append(top, reason);
+  const score = document.createElement('div'); score.className = 'sig-score'; score.textContent = s.score ? Math.round(s.score) : '';
+  card.append(bar, body, score);
+  return card;
+}
+
+function updateSignals(st){
+  if(!st||!st.ok) return;
+  const longs = st.signals?.long||[], shorts = st.signals?.short||[], watches = st.watch_long||[];
+  const ll = document.getElementById('long-list'); ll.innerHTML='';
+  if(!longs.length) ll.innerHTML='<div class="signal-item empty">目前無做多訊號</div>';
+  else longs.slice(0,10).forEach(s=>ll.appendChild(makeSigCard(s,'long')));
+  const wl = document.getElementById('watch-list'); wl.innerHTML='';
+  if(!watches.length) wl.innerHTML='<div class="signal-item empty">無觀察名單</div>';
+  else watches.slice(0,10).forEach(s=>wl.appendChild(makeSigCard(s,'watch')));
+  const sl = document.getElementById('short-list'); sl.innerHTML='';
+  if(!shorts.length) sl.innerHTML='<div class="signal-item empty">無做空警示</div>';
+  else shorts.slice(0,5).forEach(s=>sl.appendChild(makeSigCard(s,'short')));
+}
+
+function updateAnalysts(st){
+  if(!st||!st.ok) return;
+  const all = [...(st.signals?.long||[]),...(st.watch_long||[])];
+  const zhuH = all.filter(s=>s.kd_golden);
+  const aspH = all.filter(s=>s.chip_confirm);
+  const warH = all.filter(s=>s.bald_red_k);
+  const zhaH = all.filter(s=>(s.score||0)>=65);
+  setPanel('zhu', Math.min(zhuH.length*30+10,100),
+    zhuH.slice(0,5).map(s=>({text:`${s.code} ${s.name}`,hit:true})), '今日無KD黃金交叉訊號');
+  setPanel('asp', Math.min(aspH.length*35+10,100),
+    aspH.slice(0,5).map(s=>({text:`${s.code} ${s.name} 連買${s.consec_buy_days||'?'}日`,hit:true})), '今日無投信作帳訊號');
+  setPanel('war', Math.min(warH.length*40+10,100),
+    warH.slice(0,5).map(s=>({text:`⚡ ${s.code} ${s.name}`,hit:true})), '今日無爆量光頭大紅K');
+  const zhaScore = Math.round(st.gauge?.temperature||50);
+  setPanel('zha', zhaScore,
+    zhaH.slice(0,5).map(s=>({text:`${s.code} ${s.name} ${s.score}分`,hit:true})),
+    zhaH.length===0?'今日無強勢股訊號':null);
+}
+
+function setPanel(key, score, items, emptyMsg){
+  document.getElementById(`${key}-score`).textContent = score;
+  document.getElementById(`${key}-bar`).style.width = score+'%';
+  const bd = document.getElementById(`${key}-hits`); bd.innerHTML='';
+  if(emptyMsg||!items.length){
+    const d=document.createElement('div'); d.className='signal-item empty'; d.textContent=emptyMsg||'今日無訊號'; bd.appendChild(d);
+  } else {
+    items.forEach(item=>{ const d=document.createElement('div'); d.className=`signal-item ${item.hit?'hit':''}`; d.textContent=item.text; bd.appendChild(d); });
+  }
+}
+
+// ── 操作區間視覺化 ─────────────────────────────────────────────
+function buildZoneHtml(zone){
+  if(!zone) return '<div class="zone-no">此維度分數不足，不建議操作</div>';
+  const {entry_lo, entry_hi, stop, target1, target2, rr} = zone;
+  // 計算相對位置（用 stop~target2 為全距）
+  const lo = Math.min(stop, entry_lo) * 0.995;
+  const hi = Math.max(target2, target1) * 1.005;
+  const span = hi - lo;
+  const pct = v => span > 0 ? Math.max(0, Math.min(100, (v - lo) / span * 100)) : 0;
+  const stopPct   = pct(stop);
+  const entryLoPct = pct(entry_lo);
+  const entryHiPct = pct(entry_hi);
+  const t1Pct     = pct(target1);
+  const t2Pct     = pct(target2);
+
+  return `<div class="zone-box">
+    <div class="zone-title">操作區間</div>
+    <div style="position:relative;height:6px;background:var(--bg);border-radius:3px;margin:2px 0 6px">
+      <div class="zone-bar-stop"    style="left:0;width:${stopPct}%"></div>
+      <div class="zone-bar-entry"   style="left:${stopPct}%;width:${entryHiPct-stopPct}%"></div>
+      <div class="zone-bar-t1"      style="left:${entryHiPct}%;width:${t2Pct-entryHiPct}%"></div>
+      <div class="zone-bar-marker"  style="left:${entryLoPct}%"></div>
+    </div>
+    <div class="zone-row">
+      <span class="zone-label">進場</span>
+      <span class="zone-val entry">${entry_lo} ～ ${entry_hi}</span>
+      <span class="zone-rr">風報比 1:${rr}</span>
+    </div>
+    <div class="zone-row">
+      <span class="zone-label">停損</span>
+      <span class="zone-val stop">${stop}</span>
+    </div>
+    <div class="zone-row">
+      <span class="zone-label">目標</span>
+      <span class="zone-val target">${target1} &nbsp;/&nbsp; ${target2}</span>
+    </div>
+  </div>`;
+}
+
+// ── 個股分析 ────────────────────────────────────────────────
+async function doAnalyze(){
+  const code = document.getElementById('code-input').value.trim().toUpperCase();
+  if(!code) return;
+  const btn = document.getElementById('analyze-btn');
+  btn.disabled=true; btn.textContent='分析中…';
+  document.getElementById('analyzer-bd').innerHTML='<div class="loading"><div class="spinner"></div>四師分析中…</div>';
+  try{
+    const r = await fetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code})});
+    const data = await r.json();
+    if(!data.ok){ document.getElementById('analyzer-bd').innerHTML=`<div class="empty-state"><div class="empty-icon">⚠</div><div class="empty-txt">${data.error}</div></div>`; return; }
+    renderResult(document.getElementById('analyzer-bd'), data.result, data.cached);
+  } catch(e){
+    document.getElementById('analyzer-bd').innerHTML=`<div class="empty-state"><div class="empty-icon">⚠</div><div class="empty-txt">連線失敗：${e.message}</div></div>`;
+  } finally{ btn.disabled=false; btn.textContent='分析'; }
+}
+
+function renderResult(bd, res, cached){
+  bd.innerHTML='';
+  const total = Math.round(res.total_score);
+  const recColor = total>=70?'var(--green)':total>=55?'var(--orange)':total>=40?'var(--text2)':'var(--red)';
+  const hd = document.createElement('div'); hd.className='result-header';
+  hd.innerHTML=`
+    <div class="result-title">${res.code} ${res.name}
+      <span style="font-size:13px;color:var(--text2);font-weight:400;margin-left:6px">${res.industry||''}</span>
+    </div>
+    <div class="result-sub">${res.date}${cached?' <span style="color:var(--text3)">(快取)</span>':''}</div>
+    <div class="total-score">${total}<span>/100</span></div>
+    <div class="rec-text" style="color:${recColor}">${res.recommendation}</div>
+    <div class="dim-bars">
+      ${Object.entries(res.views).map(([k,v])=>{
+        const col=COLORS[k]||'var(--blue)';
+        return `<div class="dim-row">
+          <div class="dim-label" style="color:${col}">${k.slice(0,3)}</div>
+          <div class="dim-bar"><div class="dim-fill" style="background:${col};width:${v.score}%"></div></div>
+          <div class="dim-val" style="color:${col}">${v.score}</div>
+        </div>`;
+      }).join('')}
+    </div>
+    <div class="confirm-line">${res.confirm_dims}/4 維度共振（≥50分算確認）</div>`;
+  bd.appendChild(hd);
+  Object.entries(res.views).forEach(([key,v])=>{
+    const card=document.createElement('div'); card.className='view-card';
+    const col=COLORS[key]||'var(--blue)';
+    const zoneHtml = buildZoneHtml(v.zone);
+    card.innerHTML=`
+      <div class="view-hd">
+        <div class="view-dot" style="background:${col}"></div>
+        <div class="view-name" style="color:${col}">${v.view}</div>
+        <div class="view-score" style="color:${col}">${v.score}</div>
+      </div>
+      <div class="view-verdict">${v.verdict}</div>
+      <div class="view-notes">${(v.notes||[]).map(n=>{
+        const cls=n.startsWith('✅')?'pos':n.startsWith('❌')?'neg':n.startsWith('⚠')||n.startsWith('⚡')?'warn':'';
+        return `<div class="view-note ${cls}">${n}</div>`;
+      }).join('')}</div>
+      ${zoneHtml}`;
+    bd.appendChild(card);
+  });
+}
+
+// ── 掃描宇宙 ────────────────────────────────────────────────
+async function triggerScan(){
+  const btn = document.getElementById('scan-btn');
+  btn.disabled=true; btn.textContent='掃描中…';
+  try{
+    const r = await fetch('/api/scan');
+    const data = await r.json();
+    if(data.ok){
+      const mp = document.getElementById('col-mid');
+      const ex = document.getElementById('scan-results'); if(ex) ex.remove();
+      const div = document.createElement('div'); div.id='scan-results';
+      div.innerHTML='<div class="section-title">四維共振 TOP '+data.results.length+'</div>';
+      const list = document.createElement('div'); list.className='sig-list';
+      data.results.forEach(r=>{
+        const card=document.createElement('div'); card.className='sig-card';
+        card.onclick=()=>{ document.getElementById('code-input').value=r.code; doAnalyze(); };
+        card.innerHTML=`<div class="sig-side long"></div>
+          <div class="sig-body">
+            <div class="sig-top">
+              <span class="sig-code">${r.code}</span>
+              <span class="sig-name">${r.name}</span>
+              <span style="font-size:11px;color:var(--text3)">${r.confirm_dims}/4維</span>
+            </div>
+            <div class="sig-reason">${r.industry||''}</div>
+          </div>
+          <div class="sig-score">${Math.round(r.total_score)}</div>`;
+        list.appendChild(card);
+      });
+      div.appendChild(list);
+      mp.insertBefore(div, mp.firstChild);
+    }
+  } catch(e){ alert('掃描失敗：'+e.message); }
+  finally{ btn.disabled=false; btn.textContent='⚡ 掃描宇宙'; }
+}
+
+// ── 輪詢 ────────────────────────────────────────────────────
+async function refresh(){
+  const st = await loadState();
+  updateHeader(st); updateSignals(st); updateAnalysts(st);
+}
+refresh();
+setInterval(refresh, 30000);
+</script>
+</body>
+</html>

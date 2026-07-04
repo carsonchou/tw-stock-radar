@@ -1,0 +1,13 @@
+{
+  "_note": "歷史訊號流水樣本：當日已觸發訊號的時間軸陣列。前端歷史 tab 用 ?mock=1 抓本檔；prod 抓 history.json（後端 scan.py 產出）。台股紅漲綠跌。",
+  "ok": true,
+  "date": "2026-06-30",
+  "items": [
+    {"ts": "2026-06-30T09:12:00", "side": "long",  "code": "2723", "name": "美食-KY", "industry": "觀光",     "price": 65.4,  "chg": 3.10, "reason": "SuperTrend 翻多，量能放大"},
+    {"ts": "2026-06-30T09:48:00", "side": "short", "code": "2609", "name": "陽明",    "industry": "航運",     "price": 58.2,  "chg": -2.40, "reason": "跌破 20MA，航運轉弱"},
+    {"ts": "2026-06-30T10:25:00", "side": "long",  "code": "6446", "name": "藥華藥",  "industry": "生技醫療", "price": 188.0, "chg": 4.20, "reason": "突破前高，RSI 進強勢區"},
+    {"ts": "2026-06-30T11:03:00", "side": "short", "code": "2002", "name": "中鋼",    "industry": "鋼鐵金屬", "price": 18.8,  "chg": -1.05, "reason": "跌破 20MA，大盤偏空"},
+    {"ts": "2026-06-30T11:40:00", "side": "long",  "code": "3661", "name": "世芯-KY", "industry": "半導體",   "price": 4520.0, "chg": 5.80, "reason": "ASIC 題材續強，SuperTrend 翻多"},
+    {"ts": "2026-06-30T13:05:00", "side": "short", "code": "2412", "name": "中華電",  "industry": "通信網路", "price": 124.5, "chg": -0.40, "reason": "防禦股走弱，資金轉攻擊"}
+  ]
+}

@@ -1,0 +1,100 @@
+{
+  "_note": "schema 契約樣本：優化後 state.json 的目標結構。後端(scan.py)產出須符合此形狀，前端(dashboard.html)照此渲染。前端測試可用 dashboard.html?mock=1 抓本檔。台股紅漲綠跌。",
+  "ok": true,
+  "ts": "2026-06-30T13:35:00",
+  "date": "2026-06-30",
+  "source": "realtime",
+  "mode": "realtime",
+  "universe": 125,
+  "index": {
+    "name": "0050",
+    "price": 192.5,
+    "chg": -0.85,
+    "trend": "UP",
+    "above_yearline": true
+  },
+  "gauge": {
+    "temperature": 56.2,
+    "label": "中性",
+    "color": "#ffd75e",
+    "avg_rsi": 54.5,
+    "breadth": 52.8,
+    "adv": 84,
+    "dec": 36,
+    "flat": 5,
+    "adr": 2.33,
+    "nh": 18,
+    "nl": 6,
+    "nhnl": 12,
+    "vol_med": 1.12,
+    "components": {"rsi": 54.5, "breadth": 52.8, "adr": 70.0, "nhnl": 60.0, "vol": 50.0}
+  },
+  "sectors": [
+    {"name": "半導體", "avg_chg": 2.91, "bull_pct": 81, "score": 62.4, "count": 16, "hue": 200, "leader": "創意 +9.6%"},
+    {"name": "金融保險", "avg_chg": 0.61, "bull_pct": 93, "score": 58.1, "count": 14, "hue": 45, "leader": "中租-KY +2.2%"},
+    {"name": "航運", "avg_chg": -1.11, "bull_pct": 43, "score": 41.0, "count": 7, "hue": 280, "leader": "華航 +2.6%"}
+  ],
+  "strong": [
+    {"code": "6446", "name": "藥華藥", "industry": "生技醫療", "price": 195.5, "chg": 5.51, "rsi": 71.0, "score": 93.1, "st": "UP", "spark": [180.2, 182.1, 181.5, 184.0, 186.3, 185.1, 188.0, 190.2, 189.5, 191.0, 193.4, 192.1, 194.0, 193.2, 192.5, 194.8, 195.0, 193.9, 195.5, 195.5]}
+  ],
+  "weak": [
+    {"code": "1707", "name": "葡萄王", "industry": "生技醫療", "price": 138.0, "chg": -1.81, "rsi": 38.2, "score": 12.0, "st": "DOWN", "spark": [150.0, 149.2, 148.5, 147.0, 146.3, 145.1, 144.0, 143.2, 142.5, 141.0, 140.4, 139.1, 140.0, 139.2, 138.5, 139.8, 139.0, 138.9, 138.5, 138.0]}
+  ],
+  "signals": {
+    "long": [
+      {"code": "2723", "name": "美食-KY", "industry": "觀光", "price": 68.3, "chg": 6.72, "rsi": 68.0, "score": 81.8, "st": "UP", "side": "long", "reason": "SuperTrend 翻多，RSI 68 健康區，量能放大1.8x，外資+投信連買3日，過池濾網", "stop": 64.1, "tp1": 74.6, "tp2": 87.0, "foreign_net": 1240, "trust_net": 380, "instinv_net": 1620, "consec_buy_days": 3, "chip_confirm": true, "pool_pass": true, "trust_consec_days": 4, "retail_exit": true, "retail_surge": false, "small_chg_pct": -3.2, "margin_balance": 12050, "margin_chg": 320, "short_balance": 880, "short_margin_ratio": 7.3, "day_trade_pct": 22.5, "spark": [60.1, 61.2, 60.8, 62.0, 63.5, 62.1, 64.0, 65.2, 64.5, 66.0, 67.4, 66.1, 67.0, 66.2, 65.5, 66.8, 67.0, 65.9, 68.3, 68.3], "ohlc": [[60.0, 61.5, 59.8, 61.2], [61.0, 62.3, 60.5, 60.8], [60.9, 62.8, 60.7, 62.0], [62.1, 64.0, 61.9, 63.5], [63.2, 63.9, 61.8, 62.1], [62.3, 64.5, 62.0, 64.0], [64.1, 65.8, 63.9, 65.2], [65.0, 65.5, 64.0, 64.5], [64.6, 66.4, 64.4, 66.0], [66.1, 67.8, 65.9, 67.4], [67.0, 67.5, 65.8, 66.1], [66.2, 67.3, 65.9, 67.0], [66.9, 67.1, 65.5, 66.2], [66.0, 66.5, 64.9, 65.5], [65.6, 67.0, 65.3, 66.8], [66.7, 67.4, 66.0, 67.0], [67.0, 67.2, 65.6, 65.9], [66.0, 68.5, 65.8, 68.3], [68.2, 69.0, 67.5, 68.3]]}
+    ],
+    "short": [
+      {"code": "2002", "name": "中鋼", "industry": "鋼鐵金屬", "price": 18.55, "chg": -0.8, "rsi": 41.0, "score": 15.6, "st": "DOWN", "side": "short", "reason": "跌破 20MA（19.0），大盤偏空", "stop": 19.4, "tp1": 17.2, "tp2": 15.1, "spark": [20.1, 19.9, 19.8, 19.6, 19.5, 19.3, 19.2, 19.1, 19.0, 18.9, 18.8, 18.9, 18.7, 18.8, 18.6, 18.7, 18.6, 18.5, 18.55, 18.55]}
+    ],
+    "long_total": 8,
+    "short_total": 12,
+    "cap": 12
+  },
+  "watch_long": [
+    {"code": "2330", "name": "台積電", "industry": "半導體", "price": 1085.0, "chg": 0.46, "rsi": 58.0, "score": 64.0, "gap_pct": 0.8, "reason": "距 SuperTrend 翻多差 0.8%，待量能"}
+  ],
+  "track": {
+    "_note": "#1 訊號命中率回灌：已平倉訊號的真實戰績(由 track.py 用快取價事後評估)",
+    "n_closed": 42,
+    "n_open": 7,
+    "win_rate": 0.571,
+    "avg_r": 0.83,
+    "avg_ret_pct": 1.42,
+    "long_win_rate": 0.62,
+    "short_win_rate": 0.50,
+    "updated": "2026-06-30",
+    "recent": [
+      {"code": "2723", "name": "美食-KY", "side": "long", "entry_date": "2026-06-20", "entry": 60.1, "exit_date": "2026-06-27", "exit": 68.3, "ret_pct": 13.6, "r": 1.95, "result": "win", "exit_reason": "tp1"},
+      {"code": "2002", "name": "中鋼", "side": "short", "entry_date": "2026-06-23", "entry": 19.5, "exit_date": "2026-06-30", "exit": 18.55, "ret_pct": 4.9, "r": 0.7, "result": "win", "exit_reason": "open"},
+      {"code": "3008", "name": "大立光", "side": "long", "entry_date": "2026-06-18", "entry": 4400, "exit_date": "2026-06-24", "exit": 4290, "ret_pct": -2.5, "r": -1.0, "result": "loss", "exit_reason": "stop"}
+    ]
+  },
+  "chips": {
+    "_note": "Track A 三大法人籌碼(TWSE T86 + TPEX，盤後T+0；net 單位=張，外資+陸資含自營、投信、不含自營雜訊)。盤中為T-1。本樣本 source=realtime 故 t_minus=1。",
+    "t_minus": 1,
+    "date": "2026-06-30",
+    "foreign_top": [
+      {"code": "2317", "name": "鴻海", "net": 18420, "consec": 4},
+      {"code": "2330", "name": "台積電", "net": 9650, "consec": 2}
+    ],
+    "trust_top": [
+      {"code": "2454", "name": "聯發科", "net": 2110, "consec": 5},
+      {"code": "2723", "name": "美食-KY", "net": 380, "consec": 3}
+    ],
+    "consec_top": [
+      {"code": "2454", "name": "聯發科", "net": 2110, "consec": 5, "side": "trust"},
+      {"code": "2317", "name": "鴻海", "net": 18420, "consec": 4, "side": "foreign"}
+    ],
+    "margin_top": [
+      {"code": "2603", "name": "長榮", "short_margin_ratio": 18.4, "margin_chg": -1200, "day_trade_pct": 41.2},
+      {"code": "2609", "name": "陽明", "short_margin_ratio": 15.1, "margin_chg": 860, "day_trade_pct": 38.5}
+    ],
+    "margin_note": "R4 融資融券/當沖(TWSE MI_MARGN + TWTB4U，盤後)：margin_balance/short_balance單位張、short_margin_ratio券資比%、day_trade_pct當沖比%",
+    "retail_exit_top": [
+      {"code": "2317", "name": "鴻海", "small_chg_pct": -3.8, "holders": 128500},
+      {"code": "2454", "name": "聯發科", "small_chg_pct": -2.6, "holders": 88200}
+    ],
+    "tdcc_note": "R6 集保大戶持股(TDCC，週更新)：small_chg_pct=小散戶(持1-10張)戶數週變化%，負=散戶流出/主力吸籌；retail_exit小散戶週縮≥2%、retail_surge散戶大量進場"
+  }
+}

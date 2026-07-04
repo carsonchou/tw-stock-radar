@@ -276,6 +276,120 @@ def _merge_write(code: str, fresh: pd.DataFrame):
     comb.to_csv(path)
 
 
+def fetch_tpex_month(code: str, yyyymmdd: str) -> pd.DataFrame | None:
+    """TPEX 上櫃單檔月線：回傳指定月份的日線 DataFrame(大寫欄位)。"""
+    # 民國年/月 → e.g. 115/07
+    try:
+        y = int(yyyymmdd[:4]) - 1911
+        m = yyyymmdd[4:6]
+        roc = f"{y}/{m}"
+    except Exception:
+        return None
+    url = (f"https://www.tpex.org.tw/web/stock/aftertrading/daily_trading_info/"
+           f"st43_result.php?l=zh-tw&d={urllib.parse.quote(roc)}&stkno={urllib.parse.quote(code)}&s=0,asc,0")
+    try:
+        raw = _get(url)
+        d = json.loads(raw)
+    except Exception:
+        return None
+    rows_data = d.get("aaData") or d.get("data") or []
+    if not rows_data:
+        return None
+    # 欄位: [民國日期, 成交量, 成交金額, 開盤, 最高, 最低, 收盤, 漲跌, 筆數]
+    recs = []
+    for row in rows_data:
+        if len(row) < 7:
+            continue
+        iso = _roc_to_iso(str(row[0]).replace("/", "").replace(" ", ""))
+        if not iso:
+            # 格式可能是 "115/07/01" → strip slashes
+            raw_date = str(row[0]).strip()
+            parts = raw_date.split("/")
+            if len(parts) == 3:
+                try:
+                    yr = int(parts[0]) + 1911
+                    iso = f"{yr:04d}-{parts[1].zfill(2)}-{parts[2].zfill(2)}"
+                except Exception:
+                    continue
+            else:
+                continue
+        c = _num(row[6])
+        if c is None:
+            continue
+        recs.append((iso, _num(row[3]) or c, _num(row[4]) or c,
+                     _num(row[5]) or c, c, _num(row[1]) or 0))
+    if not recs:
+        return None
+    df = pd.DataFrame(recs, columns=["Date"] + _COLS).set_index("Date")
+    df.index = pd.to_datetime(df.index, errors="coerce")
+    df = df[df.index.notna()].sort_index()
+    return df if len(df) else None
+
+
+def rebuild_missing(codes_market: list[tuple[str, str]], months: int = 9,
+                    sleep: float = 0.5, verbose: bool = True,
+                    cache_dir: Path | None = None) -> int:
+    """對沒有快取的股票，依市場選 TWSE/TPEX 直接 API 補歷史，失敗再退 yfinance 個別。
+    codes_market: [(code, market), ...] 其中 market = '上市'|'上櫃'|其他。
+    cache_dir: 快取目錄(預設 CACHE_DIR)。
+    回傳成功數。"""
+    dest = cache_dir or CACHE_DIR
+    dest.mkdir(parents=True, exist_ok=True)
+    today = date.today()
+    yms = []
+    y, m = today.year, today.month
+    for _ in range(months):
+        yms.append(f"{y:04d}{m:02d}01")
+        m -= 1
+        if m == 0:
+            m = 12; y -= 1
+
+    ok = 0
+    for i, (code, market) in enumerate(codes_market, 1):
+        frames = []
+        if market == "上市":
+            for ym in yms:
+                df = fetch_twse_month(code, ym)
+                if df is not None and len(df):
+                    frames.append(df)
+                time.sleep(sleep)
+        else:  # 上櫃 or unknown — try TPEX then yfinance
+            for ym in yms:
+                df = fetch_tpex_month(code, ym)
+                if df is not None and len(df):
+                    frames.append(df)
+                time.sleep(sleep)
+
+        if not frames:
+            # fallback: yfinance 個別
+            try:
+                import yfinance as yf
+                suf = ".TW" if market == "上市" else ".TWO"
+                tkr = yf.Ticker(f"{code}{suf}")
+                hist = tkr.history(period="9mo", auto_adjust=False)
+                if not hist.empty:
+                    hist = hist.rename(columns={"Open": "Open", "High": "High",
+                                                "Low": "Low", "Close": "Close",
+                                                "Volume": "Volume"})
+                    frames = [hist[_COLS]]
+            except Exception:
+                pass
+
+        if frames:
+            allm = pd.concat(frames)
+            allm = allm[~allm.index.duplicated(keep="last")].sort_index()
+            suffix = "_TW.csv" if market == "上市" else "_TWO.csv"
+            path = dest / f"{code}{suffix}"
+            allm[_COLS].to_csv(path)
+            ok += 1
+            tag = f"OK {len(allm)}筆"
+        else:
+            tag = "全失敗"
+        if verbose:
+            print(f"[twse] 補缺 {i}/{len(codes_market)} {code}({market})：{tag}", flush=True)
+    return ok
+
+
 def rebuild_history(codes: list[str], months: int = 9, sleep: float = 0.6) -> int:
     """用 TWSE STOCK_DAY 逐月回補近 months 個月官方日線，覆蓋(修正)既有 yfinance 快取。
     只做上市(.TW)；上櫃單檔另需 TPEX(此版先跳過，仍走既有)。回傳成功檔數。"""

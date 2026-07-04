@@ -903,6 +903,11 @@
     </div>
   </header>
 
+  <!-- cold-start: shown when cache < 500 files -->
+  <div id="prefillBanner" style="display:none;background:#6b4f00;color:#ffe082;padding:9px 18px;font-size:12.5px;border-bottom:1px solid #b8860b;text-align:center;letter-spacing:.3px;line-height:1.6">
+    ⚠ 快取僅 <strong id="bannerCount">0</strong> 檔（全市場期望 1,900+）。首次使用請先執行：<code style="background:#0004;padding:1px 7px;border-radius:3px;margin:0 5px;font-size:12px">python prefill_cache.py</code> 約 20 分鐘後重啟 app 即可看到全市場數據
+  </div>
+
   <!-- 主題單圖快照海報標頭（僅 ?snapshot=chips/track/flow 顯示） -->
   <div class="snapPoster" id="snapPoster">
     <div class="sp-kicker">量化阿森 · 台股數據獵手</div>
@@ -1875,6 +1880,8 @@ async function load(){
     md.textContent=modeMap[d.mode]||d.mode;
     md.className='badge '+(['realtime','intraday_rt','intraday'].includes(d.mode)?'live':'');
     $('#uni').textContent='掃描 '+d.universe+' 檔';
+    const _b=document.getElementById('prefillBanner');
+    if(_b){if(d.universe<500){document.getElementById('bannerCount').textContent=d.universe;_b.style.display='block';}else{_b.style.display='none';}}
     $('#upd').textContent='最後更新 '+d.ts.replace('T',' ');
     $('#hb').style.background='#2bab82';
 

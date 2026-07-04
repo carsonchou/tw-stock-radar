@@ -1,10 +1,25 @@
 # tw-stock-radar 🎯
 
+![Python](https://img.shields.io/badge/Python-3.9+-blue?logo=python&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-green)
+![Tests](https://img.shields.io/badge/Tests-~100%20passing-brightgreen)
+![Data](https://img.shields.io/badge/Data-100%25%20free%20open%20data-orange)
+
 **AI-powered Taiwan stock scanner** — full-market chips, technicals, fundamentals, and AI analyst signals in a dark Iron Man HUD dashboard. 100% free open data. No API key required for core features.
 
 > Scans all 1,800+ TWSE + TPEX listed stocks. Used daily in production.
 
 [繁體中文 README](README.md)
+
+---
+
+## Screenshots
+
+![Dashboard — Market Radar & Sector Rotation](docs/screenshot-dashboard.png)
+*Main dashboard: market temperature gauge, sector rotation heatmap, live signal cards*
+
+![Chips Flow — Institutional & Margin Data](docs/screenshot-chips.png)
+*Chips tab: foreign/trust net buy rankings, consecutive buy streaks, margin & day-trade ratios*
 
 ---
 

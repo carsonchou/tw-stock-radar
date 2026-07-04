@@ -5,6 +5,7 @@
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![Tests](https://img.shields.io/badge/Tests-109%20passing-brightgreen)
 ![Data](https://img.shields.io/badge/Data-100%25%20free%20open%20data-orange)
+![Tests](https://github.com/carsonchou/tw-stock-radar/actions/workflows/test.yml/badge.svg)
 
 **Free Python scanner for all 1,800+ TWSE/TPEX stocks** — institutional chips, 13 technicals, fundamentals, and AI analyst deep-dives in a dark HUD dashboard. No API key required for core features.
 

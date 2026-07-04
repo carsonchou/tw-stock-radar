@@ -42,10 +42,10 @@ def _market_hours() -> bool:
 
 def worker():
     """背景掃描迴圈：每天刷快取 + 即時同步掃描 + 推播 + 每日全市場交易專區。"""
-    rows = scan.all_codes()              # 精選宇宙(快、可即時同步)
+    rows = scan.load_full_universe()     # 全市場(~1900 檔上市櫃)
     last_fresh: date | None = None
     zones_day: date | None = None
-    print(f"[app] 背景掃描啟動（精選 {len(rows)} 檔，跟市場同步）")
+    print(f"[app] 背景掃描啟動（全市場 {len(rows)} 檔）")
     while True:
         mh = _market_hours()
         try:

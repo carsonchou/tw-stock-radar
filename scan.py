@@ -37,6 +37,7 @@ import pandas as pd
 
 HERE = Path(__file__).resolve().parent
 CACHE_DIR = HERE / "cache"
+CACHE_DIR.mkdir(parents=True, exist_ok=True)
 STATE_FILE = HERE / "state.json"
 SIG_LOG = HERE / "signals_log.json"    # 已推過的訊號(去重)
 HIST_FILE = HERE / "history.json"      # 當日已確認訊號流水(給看板回顧)
@@ -190,7 +191,8 @@ def _bulk_yf(codes: list[str], suffix: str, intraday: bool = False,
     out: dict[str, pd.DataFrame] = {}
     # 日線一律走 twstock 官方(證交所/櫃買)：yfinance 抓台股不可靠——上櫃全錯(環球晶6488 786vs官方1105)、
     # 部分上市也錯/過時。twstock 是官方源、上市上櫃皆正確。intraday 仍走 yfinance(twstock 無分時；即時另有 realtime 覆蓋)。
-    if not intraday:
+    # 精選宇宙(<=50檔)走 twstock 官方逐檔(正確)；全市場(120檔/批)走 yfinance 批量(快)
+    if not intraday and len(codes) <= 50:
         try:
             import twse_price as _tp
             for c in codes:

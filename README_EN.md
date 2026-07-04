@@ -1,7 +1,7 @@
 # tw-stock-radar 🎯
 
 ![Python](https://img.shields.io/badge/Python-3.9+-blue?logo=python&logoColor=white)
-![PyPI](https://img.shields.io/pypi/v/tw-stock-radar?color=blue)
+![Install](https://img.shields.io/badge/install-pip%20from%20GitHub-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![Tests](https://img.shields.io/badge/Tests-109%20passing-brightgreen)
 ![Data](https://img.shields.io/badge/Data-100%25%20free%20open%20data-orange)
@@ -67,9 +67,9 @@ Retail outflow + institutional accumulation = classic smart money setup.
 
 ## Quick Start
 
-**Option A — pip install (recommended):**
+**Option A — pip install from GitHub (no PyPI required):**
 ```bash
-pip install tw-stock-radar
+pip install git+https://github.com/carsonchou/tw-stock-radar
 tw-stock-radar          # → http://localhost:8899
 ```
 

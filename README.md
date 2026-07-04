@@ -34,20 +34,31 @@
 
 > 做不到（誠實）：即時逐筆真 tick（MIS 是~20秒快照）、券商分點（TWSE 分點報表有 captcha）——需付費行情源。
 
+## 快速開始
+
+```bash
+git clone https://github.com/carsonchou/tw-stock-radar
+cd tw-stock-radar
+pip install -r requirements.txt
+cp .env.example .env                  # 選填：AI/推播 key
+python prefill_cache.py               # 首次只跑一次，約 20 分鐘
+python app.py                         # → http://127.0.0.1:8899/
+```
+
+Windows 直接雙擊 `app_launch.bat` 也可以。
+
 ## 怎麼用
 
 | 想做的事 | 指令 / 雙擊 |
 |---|---|
-| **桌面 app 一鍵開（推薦）** | 桌面捷徑「台股數據獵手」或 `app_launch.bat` |
-| **盤後一鍵全跑**（刷快取→籌碼→掃描→產貼文） | `python eod.py`（`--no-post` 只到看板／`--push` 推ntfy） |
-| **一鍵今日貼文**（IG/YT 文案+海報圖） | `python daily_post.py`（`--scan` 先掃／`--themes board,chips`） |
-| 開即時看板 | `開啟看板.bat` |
-| 背景掃描迴圈（自動推 ntfy） | `背景掃描.bat` |
-| 掃全市場 ~1900 檔 | `全市場掃描.bat` 或 `scan.py --full` |
-| 跟市場同步（證交所即時價，盤中秒級） | `scan.py --realtime` |
-| 刷快取／只讀快取不連網 | `scan.py --freshen`／`scan.py --cache` |
-| 訊號參數校準（研究用，不回寫除非 --apply） | `python calibrate.py [--full]` |
-| 跑單元測試（~100 個，全綠） | `python -m unittest discover -s tests` |
+| **桌面 app 一鍵開（推薦）** | `app_launch.bat` |
+| **盤後一鍵全跑**（刷快取→籌碼→掃描） | `python eod.py` |
+| 開即時看板（不含背景掃描） | `python server.py` |
+| 掃全市場 ~1900 檔 | `python scan.py --full` |
+| 跟市場同步（證交所即時價，盤中） | `python scan.py --realtime` |
+| 刷快取／只讀快取不連網 | `python scan.py --freshen`／`--cache` |
+| 訊號參數校準（研究用） | `python calibrate.py [--full]` |
+| 跑單元測試（~110 個，全綠） | `python -m unittest discover -s tests` |
 
 看板網址：<http://127.0.0.1:8899/>；快照海報：`?snapshot=1|chips|track|flow`（IG 直式 1080×1350）。
 
@@ -66,7 +77,7 @@
 - 籌碼：TWSE/TPEX/TDCC open data（見上表）
 - **基本面**：證交所 **BWIBBU_ALL**（PE/PB/殖利率，全市場當日、免 token）＋ **FinMind**（EPS/毛利/月營收/股利/除權息；`FINMIND_TOKEN` env 選配，免 token 300/hr）→ `fundamentals.py`
 - **新聞**：Google News RSS → `news.py`
-- 跑在 `D:\ClawWork\.venv`（pandas/numpy/twstock/yfinance）；推播 `../notify.py`（ntfy topic 從 `../.env`）
+- 執行環境：標準 Python 3.9+，`pip install -r requirements.txt`；推播走 `ntfy.sh`（設 `NTFY_TOPIC` env）
 
 ## 檔案
 ```

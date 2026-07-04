@@ -457,6 +457,9 @@ def calc_tower(df: pd.DataFrame, lookback: int = 3) -> dict:
 
 def resample_ohlc(df: pd.DataFrame, rule: str, bars: int = 40) -> list:
     """把日線 resample 成週(rule='W')/月(rule='M')K，回最近 bars 根 [o,h,l,c] 陣列（給前端畫 K）。"""
+    # pandas ≥ 2.2 廢棄舊 alias：M→ME, Q→QE, Y/A→YE
+    _compat = {"M": "ME", "Q": "QE", "A": "YE", "Y": "YE"}
+    rule = _compat.get(rule, rule)
     d = _normalize_cols(df).copy()
     if not isinstance(d.index, pd.DatetimeIndex):
         return []

@@ -41,9 +41,7 @@ from datetime import date, datetime, timedelta
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-QS = HERE.parent                       # quant-service/
-ROOT = QS.parent                       # carson-agent/
-CHIPS_DIR = ROOT / "twdata" / "chips"  # 每交易日一檔 JSON(本地快取)
+CHIPS_DIR = HERE / "chips"             # 每交易日一檔 JSON(本地快取)
 
 try:
     sys.stdout.reconfigure(encoding="utf-8")

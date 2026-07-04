@@ -97,7 +97,7 @@ Optional (`.env`):
 ## Testing
 
 ```bash
-python -m pytest tests/ -v
+python -m unittest discover -s tests/ -v
 ```
 
 ~100 tests, stdlib unittest only, zero network calls, passes in < 3 seconds.

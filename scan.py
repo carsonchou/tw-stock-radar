@@ -36,14 +36,12 @@ import numpy as np
 import pandas as pd
 
 HERE = Path(__file__).resolve().parent
-QS = HERE.parent                       # quant-service/
-ROOT = QS.parent                       # carson-agent/
-CACHE_DIR = ROOT / "twdata" / "cache"
+CACHE_DIR = HERE / "cache"
 STATE_FILE = HERE / "state.json"
 SIG_LOG = HERE / "signals_log.json"    # 已推過的訊號(去重)
 HIST_FILE = HERE / "history.json"      # 當日已確認訊號流水(給看板回顧)
 
-sys.path.insert(0, str(QS))            # 讓 indicators / notify 可匯入
+sys.path.insert(0, str(HERE))          # 讓 indicators / notify 可匯入
 try:
     sys.stdout.reconfigure(encoding="utf-8")
 except Exception:
@@ -77,7 +75,7 @@ except Exception as _e:                     # pragma: no cover
 # .env(NTFY_TOPIC / LINE_NOTIFY_TOKEN) 由 quant-service 載入
 try:
     from dotenv import load_dotenv
-    load_dotenv(QS / ".env")
+    load_dotenv(HERE / ".env")
 except Exception:
     pass
 
@@ -1205,7 +1203,7 @@ def push_new_signals(state: dict) -> int:
 
 # ── 主程式 ────────────────────────────────────────────────────────────────
 def run_once(push: bool = True, cache_only: bool = False, intraday: bool = False,
-             full: bool = False, realtime: bool = False) -> dict:
+             full: bool = True, realtime: bool = False) -> dict:
     t0 = time.time()
     if full and intraday:
         print("[hunter] 全市場(~1900檔)盤中分時不切實際→自動改日線")

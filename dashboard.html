@@ -255,6 +255,51 @@
   @media(max-width:620px){.zplay{grid-template-columns:1fr}}
   .zplay .pk{font-family:var(--mono);font-size:10px;color:var(--dim);margin-bottom:2px}
   .zplay .pv{font-size:12.5px;color:var(--txt);line-height:1.5}
+  /* === 三段式展開卡 === */
+  .zcard{border-top:1px solid rgba(255,255,255,.06)}
+  .zcard-inner{padding:12px 16px}
+  .zrl{display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:11.5px;font-family:var(--mono)}
+  .zrl-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+  .zrl.green .zrl-dot{background:#00d478;box-shadow:0 0 6px #00d478a0}
+  .zrl.yellow .zrl-dot{background:#ffc832;box-shadow:0 0 6px #ffc83280}
+  .zrl.red .zrl-dot{background:#ff4040;box-shadow:0 0 6px #ff404080}
+  .zrl.green .zrl-txt{color:#00d478}
+  .zrl.yellow .zrl-txt{color:#ffc832}
+  .zrl.red .zrl-txt{color:#ff6060}
+  .zanalyst{font-size:11.5px;color:var(--dim);line-height:1.7;margin-bottom:10px;
+    padding:8px 10px;background:rgba(255,255,255,.03);border-radius:4px;
+    border-left:2px solid rgba(0,212,170,.3)}
+  .zsig-row{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px}
+  .zsig{font-size:10px;padding:2px 7px;border-radius:3px;font-family:var(--mono)}
+  .zsig.sok{background:rgba(0,212,120,.1);border:1px solid rgba(0,212,120,.25);color:#00d478}
+  .zsig.sno{background:rgba(255,70,70,.08);border:1px solid rgba(255,70,70,.2);color:#ff6060}
+  .zsig.swrn{background:rgba(255,200,50,.08);border:1px solid rgba(255,200,50,.2);color:#ffc832}
+  .zsig.sinfo{background:rgba(0,180,255,.08);border:1px solid rgba(0,180,255,.2);color:#00b4ff}
+  .zbar-wrap{position:relative;height:16px;background:rgba(255,255,255,.04);
+    border-radius:3px;margin-bottom:5px;overflow:visible}
+  .zbar-zone{position:absolute;top:0;height:100%;background:rgba(0,212,170,.15);
+    border-left:1.5px solid rgba(0,212,170,.5);border-right:1.5px solid rgba(0,212,170,.5)}
+  .zbar-cur{position:absolute;width:2px;height:160%;top:-30%;background:#fff;
+    border-radius:1px;box-shadow:0 0 4px #fff5}
+  .zbar-stop{position:absolute;width:1.5px;height:100%;background:rgba(255,70,70,.9)}
+  .zbar-tp1{position:absolute;width:1.5px;height:100%;background:rgba(0,212,120,.7)}
+  .zbar-tp2{position:absolute;width:1.5px;height:100%;background:rgba(0,160,255,.5)}
+  .zbar-lbls{display:flex;justify-content:space-between;font-size:9px;
+    color:var(--dim);margin-bottom:8px;font-family:var(--mono)}
+  .zdt-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px}
+  .zdt-cell{background:rgba(255,255,255,.03);border-radius:4px;padding:6px 8px;text-align:center}
+  .zdt-lbl{font-size:9px;color:var(--dim);font-family:var(--mono);margin-bottom:2px}
+  .zdt-val{font-size:13px;font-family:var(--mono)}
+  .zdt-ok{color:#00d478}.zdt-warn{color:#ffc832}.zdt-bad{color:#ff6060}
+  .zdt-key{display:flex;justify-content:space-between;font-size:11px;
+    font-family:var(--mono);padding:5px 0;border-top:1px solid rgba(255,255,255,.06)}
+  .zlt-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:8px}
+  .zlt-cell{background:rgba(255,255,255,.03);border-radius:4px;padding:6px 8px;text-align:center}
+  .zlt-lbl{font-size:9px;color:var(--dim);font-family:var(--mono);margin-bottom:2px}
+  .zlt-val{font-size:13px;font-family:var(--mono)}
+  .zlt-sub{font-size:9px;margin-top:1px}
+  .zlt-ok{color:#00d478}.zlt-warn{color:#ffc832}.zlt-bad{color:#ff6060}
+  .zlt-trend{display:flex;gap:10px;font-size:11px;font-family:var(--mono);margin-top:4px}
   .zNote{font-family:var(--mono);font-size:10.5px;color:var(--faint);text-align:center;margin-top:12px}
   .zEmpty{color:var(--dim);font-size:13px;padding:20px;text-align:center;font-family:var(--mono)}
   .rchg{font-family:var(--mono);font-variant-numeric:tabular-nums;font-weight:700;min-width:54px;text-align:right}
@@ -2378,6 +2423,107 @@ if(SNAP){ loadHistory(); }
       setups.map(s=>`<span class="zChip${zSetup===s?' on':''}" data-s="${s}">${s}</span>`).join('');
     renderZoneTable();
   }
+  // ── 交易專區三段式展開卡 ─────────────────────────────────────────────
+  function _zRL(c){
+    const r=c.readiness||'yellow',lbl=c.readiness_label||'等確認訊號';
+    return `<div class="zrl ${r}"><div class="zrl-dot"></div><span class="zrl-txt">${lbl}</span></div>`;
+  }
+  function _zNote(c){
+    return c.analyst_note?`<div class="zanalyst">${c.analyst_note}</div>`:'';
+  }
+  function _zSigs(c){
+    const sigs=c.signals||[]; if(!sigs.length) return '';
+    const html=sigs.map(s=>{
+      const cls=s.startsWith('✅')?'sok':s.startsWith('❌')?'sno':
+                (s.startsWith('⚠')||s.startsWith('⚡')||s.startsWith('🔥'))?'swrn':'sinfo';
+      return `<span class="zsig ${cls}">${s}</span>`;
+    }).join('');
+    return `<div class="zsig-row">${html}</div>`;
+  }
+  function _zBar(c){
+    const p=c.play||{};
+    const lo=p.entry_lo,hi=p.entry_hi,sv=p.stop_val,t1=p.tp1_val,t2=p.tp2_val,cur=c.price;
+    const nums=[lo,hi,sv,t1,t2,cur].filter(v=>v!=null);
+    if(nums.length<3||!sv) return '';
+    const minP=Math.min(...nums)*0.99,maxP=Math.max(...nums)*1.01,span=maxP-minP;
+    const P=v=>span>0?Math.max(0,Math.min(100,(v-minP)/span*100)):0;
+    const zone=(lo&&hi)?`<div class="zbar-zone" style="left:${P(lo)}%;width:${Math.max(1.5,P(hi)-P(lo))}%"></div>`:'';
+    const smk=`<div class="zbar-stop" style="left:${P(sv)}%"></div>`;
+    const t1mk=t1?`<div class="zbar-tp1" style="left:${P(t1)}%"></div>`:'';
+    const t2mk=t2?`<div class="zbar-tp2" style="left:${P(t2)}%"></div>`:'';
+    const cmk=cur?`<div class="zbar-cur" style="left:${P(cur)}%"></div>`:'';
+    const rrTxt=p.rr?`R:R 1:${p.rr}`:'';
+    return `<div class="zbar-wrap">${zone}${smk}${t1mk}${t2mk}${cmk}</div>
+      <div class="zbar-lbls">
+        <span style="color:#ff6060">▲${sv} 停損</span>
+        <span style="color:var(--acc2)">${lo||'—'}~${hi||'—'} 進場</span>
+        <span style="color:#00d478">${t1||'—'} T1${t2?' / '+t2+' T2':''}</span>
+        <span>${rrTxt}</span>
+      </div>`;
+  }
+  function buildDaytradeCard(c,ncols){
+    const m=c.metrics||{},p=c.play||{};
+    const rv=m.relvol,amp=m.amplitude,dtp=m.day_trade_pct,amt=m.amount;
+    const rvC=(rv||0)>=2?'zdt-ok':(rv||0)>=1.5?'zdt-warn':'zdt-bad';
+    const ampC=(amp||0)>=3?'zdt-ok':(amp||0)>=2?'zdt-warn':'zdt-bad';
+    const dtpC=(dtp||0)>=15?'zdt-ok':(dtp||0)>=10?'zdt-warn':'zdt-bad';
+    const grid=`<div class="zdt-grid">
+      <div class="zdt-cell"><div class="zdt-lbl">相對量</div><div class="zdt-val ${rvC}">${rv!=null?rv+'x':'—'}</div></div>
+      <div class="zdt-cell"><div class="zdt-lbl">當沖比</div><div class="zdt-val ${dtpC}">${dtp!=null?dtp+'%':'—'}</div></div>
+      <div class="zdt-cell"><div class="zdt-lbl">振幅</div><div class="zdt-val ${ampC}">${amp!=null?amp+'%':'—'}</div></div>
+      <div class="zdt-cell"><div class="zdt-lbl">成交額</div><div class="zdt-val">${amt!=null?amt+'億':'—'}</div></div>
+    </div>`;
+    const key=p.stop_val&&p.tp1_val?`<div class="zdt-key">
+      <span style="color:#ff6060">停損 ${p.stop_val}（−1.5%）</span>
+      <span style="color:#00d478">T1 ${p.tp1_val}（+2%）&nbsp;&nbsp;T2 ${p.tp2_val||'—'}（+3%）</span>
+    </div>`:'';
+    return `<tr class="zplay-row"><td colspan="${ncols+3}"><div class="zcard"><div class="zcard-inner">
+      ${_zRL(c)}${_zNote(c)}${grid}${key}
+    </div></div></td></tr>`;
+  }
+  function buildSwingCard(c,ncols){
+    return `<tr class="zplay-row"><td colspan="${ncols+3}"><div class="zcard"><div class="zcard-inner">
+      ${_zRL(c)}${_zNote(c)}${_zBar(c)}${_zSigs(c)}
+    </div></div></td></tr>`;
+  }
+  function buildLongtermCard(c,ncols){
+    const m=c.metrics||{};
+    const dy=m.yield,pe=m.pe,roe=m.roe,rev=m.rev_yoy;
+    const peLbl=pe?(pe<15?'偏低':pe<25?'合理':'偏高'):'';
+    const dyC=(dy||0)>=5?'zlt-ok':(dy||0)>=3?'zlt-warn':'zlt-bad';
+    const peC=pe&&pe<=15?'zlt-ok':pe&&pe<=25?'zlt-warn':'zlt-bad';
+    const roeC=(roe||0)>=15?'zlt-ok':(roe||0)>=8?'zlt-warn':'zlt-bad';
+    const revC=(rev||0)>5?'zlt-ok':(rev||0)>=0?'zlt-warn':'zlt-bad';
+    const grid=`<div class="zlt-grid">
+      <div class="zlt-cell"><div class="zlt-lbl">殖利率</div>
+        <div class="zlt-val ${dyC}">${dy!=null?dy+'%':'—'}</div>
+        <div class="zlt-sub ${dyC}">${(dy||0)>=5?'✅高殖利':(dy||0)>=3?'⚠️普通':'❌偏低'}</div></div>
+      <div class="zlt-cell"><div class="zlt-lbl">PE 估值</div>
+        <div class="zlt-val ${peC}">${pe!=null?pe+'x':'—'}</div>
+        <div class="zlt-sub ${peC}">${pe?peLbl:'—'}</div></div>
+      <div class="zlt-cell"><div class="zlt-lbl">ROE</div>
+        <div class="zlt-val ${roeC}">${roe!=null?roe+'%':'—'}</div>
+        <div class="zlt-sub ${roeC}">${(roe||0)>=15?'✅優質':(roe||0)>=8?'⚠️普通':'❌偏低'}</div></div>
+      <div class="zlt-cell"><div class="zlt-lbl">營收年增</div>
+        <div class="zlt-val ${revC}">${rev!=null?(rev>0?'+':'')+rev+'%':'—'}</div>
+        <div class="zlt-sub ${revC}">${rev!=null?(rev>5?'✅成長':rev>=0?'⚠️持平':'❌衰退'):'—'}</div></div>
+    </div>`;
+    const a60=m.above60;
+    const a20sig=c.signals&&c.signals.some(s=>s.includes('月線上方'));
+    const trend=`<div class="zlt-trend">
+      <span>${a60?'✅':'❌'} 年線${a60?'上方':'下方'}</span>
+      <span>${a20sig?'✅':'❌'} 月線${a20sig?'上方':'下方'}</span>
+    </div>`;
+    return `<tr class="zplay-row"><td colspan="${ncols+3}"><div class="zcard"><div class="zcard-inner">
+      ${_zRL(c)}${_zNote(c)}${grid}${trend}
+    </div></div></td></tr>`;
+  }
+  function buildZplayCard(c,ncols){
+    const style=c.style||'swing';
+    if(style==='daytrade') return buildDaytradeCard(c,ncols);
+    if(style==='longterm') return buildLongtermCard(c,ncols);
+    return buildSwingCard(c,ncols);
+  }
   function renderZoneTable(){
     const t=document.getElementById('zTable'); if(!t) return;
     let cands=((zonesData[zStyle]||{}).cands||[]).slice();
@@ -2397,13 +2543,7 @@ if(SNAP){ loadHistory(); }
       let row=`<tr class="zrow" data-code="${c.code}"><td class="zrank tleft">${i+1}</td>`+
         `<td class="znm tleft" data-open="${c.code}"><span class="rcode">${c.code}</span><b>${c.name}</b>${tags}</td>`+
         cells+`<td class="zexp" data-exp="${c.code}">${exp}</td></tr>`;
-      if(zExpanded.has(c.code)&&c.play){ const p=c.play;
-        row+=`<tr class="zplay-row"><td colspan="${cols.length+3}"><div class="zplay">`+
-          `<div><div class="pk">進場</div><div class="pv">${p.entry||'—'}</div></div>`+
-          `<div><div class="pk">停損</div><div class="pv" style="color:var(--dn)">${p.stop||'—'}</div></div>`+
-          `<div><div class="pk">停利/目標</div><div class="pv" style="color:var(--up)">${p.target||'—'}</div></div>`+
-          `<div><div class="pk">紀律</div><div class="pv">${p.note||'—'}</div></div>`+
-          `</div></td></tr>`; }
+      if(zExpanded.has(c.code)){ row+=buildZplayCard(c,cols.length); }
       return row; }).join('');
     t.innerHTML=thead+`<tbody>${body}</tbody>`;
   }

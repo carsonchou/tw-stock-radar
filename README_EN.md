@@ -58,13 +58,37 @@ replayed backtest parameters.
 
 ## Screenshots
 
-| Market Radar | Institutional Chips |
-|:---:|:---:|
-| ![Market temperature gauge, sector heatmap, signal cards](docs/screenshot-dashboard.png) | ![T86 foreign/trust rankings, TDCC retail exit leaderboard](docs/screenshot-chips.png) |
+**Market Radar tab** (`看板`)
 
-| Sector Capital Flow | Signal Track Record |
+![Market temperature gauge, sector heatmap, live signal cards](docs/screenshot-dashboard.png)
+
+> **① 市場溫度 — Market Temperature** composite breadth score 0–100 (RSI ratio + MA20 ratio + advance/decline + new-high/new-low + volume)  
+> **② 板塊熱流 — Sector Heat Flow** capital rotation heatmap by industry  
+> **③ 訊號卡 — Signal Cards** live buy/sell signals with ATR stop-loss, TP1 (+1.5R), TP2 (+4.5R)  
+> **④ 強弱榜 — Strength Ranking** top gainers/losers by composite score  
+> **⑤ 漲跌家數 — Advance/Decline** red/green breadth bar
+
+---
+
+**Institutional Chips tab** (`法人資金流向`)
+
+![T86 foreign/trust net buy rankings, TDCC retail exit leaderboard](docs/screenshot-chips.png)
+
+> **外資買超 — Foreign Fund Net Buy** TWSE T86 daily institutional flow ranked by net buy (lots)  
+> **投信連買 — Trust Fund Consecutive Buy** Aspirin method: trust funds buying consecutively for N days  
+> **融資增減 — Margin Balance Change** margin balance Δ, short/margin ratio  
+> **集保散戶流出 — TDCC Retail Exit** stocks where small holders (1–10 lots) decreased most — classic smart-money accumulation signal
+
+---
+
+**Sector Capital Flow tab** (`板塊熱流`) · **Signal Track Record tab** (`實盤戰績`)
+
+| Sector treemap | Track record |
 |:---:|:---:|
-| ![Treemap: area = stock count, color = sector return](docs/screenshot-sector.png) | ![Real win rate and R-multiple from live post-signal tracking](docs/screenshot-track.png) |
+| ![Capital flow treemap — area = stock count, color = return](docs/screenshot-sector.png) | ![Real post-signal win rate and R-multiple from live data](docs/screenshot-track.png) |
+
+> **Left — 資金流向 Treemap:** area = number of stocks in sector, color = sector return (red = up, green = down in Taiwan convention)  
+> **Right — 實盤戰績 Track Record:** actual entry→exit prices and P&L from live signals — not backtest. Win rate and average R calculated from real cached prices at T+5/T+10.
 
 ---
 

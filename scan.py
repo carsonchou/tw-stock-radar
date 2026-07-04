@@ -439,8 +439,8 @@ def _st_dirs(df: pd.DataFrame) -> tuple[str | None, str | None]:
     tr = pd.concat([high - low, (high - prev_close).abs(), (low - prev_close).abs()], axis=1).max(axis=1)
     atr = tr.ewm(alpha=1 / ST_PERIOD, min_periods=ST_PERIOD, adjust=False).mean()
     hl2 = (high + low) / 2
-    ub = (hl2 + ST_MULT * atr).to_numpy()
-    lb = (hl2 - ST_MULT * atr).to_numpy()
+    ub = (hl2 + ST_MULT * atr).to_numpy().copy()
+    lb = (hl2 - ST_MULT * atr).to_numpy().copy()
     c = close.to_numpy()
     st = np.full(n, np.nan)
     d = np.zeros(n, dtype=int)

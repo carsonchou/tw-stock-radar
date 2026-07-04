@@ -22,8 +22,7 @@ from datetime import datetime
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-ROOT = HERE.parent.parent
-NEWS_DIR = ROOT / "twdata" / "news"
+NEWS_DIR = HERE / "twdata" / "news"
 NEWS_DIR.mkdir(parents=True, exist_ok=True)
 
 try:

@@ -44,9 +44,7 @@ from datetime import date, datetime, timedelta
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-QS = HERE.parent
-ROOT = QS.parent
-TDCC_DIR = ROOT / "twdata" / "tdcc"
+TDCC_DIR = HERE / "twdata" / "tdcc"
 
 try:
     sys.stdout.reconfigure(encoding="utf-8")

@@ -25,9 +25,8 @@ from datetime import datetime
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-ROOT = HERE.parent.parent
-ZONES_JSON = HERE / "state_zones.json"       # 與 state.json 同層；gitignore 執行期資料
-TWDATA_ZONES = ROOT / "twdata" / "zones.json"
+ZONES_JSON = HERE / "state_zones.json"
+TWDATA_ZONES = HERE / "twdata" / "zones.json"
 
 try:
     sys.stdout.reconfigure(encoding="utf-8")

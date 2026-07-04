@@ -41,7 +41,7 @@ import scan                                          # 常數 + _read_cache(單�
 import validate as V                                 # 向量化 _st_dir_series / _rsi_series
 from universe import all_codes, load_full_universe
 
-OUT_MD = scan.ROOT / "twdata" / "calibrate_result.md"
+OUT_MD = scan.HERE / "twdata" / "calibrate_result.md"
 
 # 出場/評估常數(對齊 track.py)
 TIME_STOP_BARS = 15                                  # 別抄 strategy 的 45

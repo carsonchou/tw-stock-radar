@@ -33,9 +33,7 @@ from datetime import date, datetime
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-QS = HERE.parent
-ROOT = QS.parent
-FUND_DIR = ROOT / "twdata" / "fundamentals"
+FUND_DIR = HERE / "twdata" / "fundamentals"
 FUND_DIR.mkdir(parents=True, exist_ok=True)
 
 try:

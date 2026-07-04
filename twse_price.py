@@ -24,7 +24,7 @@ from pathlib import Path
 import pandas as pd
 
 HERE = Path(__file__).resolve().parent
-CACHE_DIR = HERE.parent.parent / "twdata" / "cache"
+CACHE_DIR = HERE / "cache"
 CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
 _UA = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}

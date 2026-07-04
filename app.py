@@ -51,6 +51,11 @@ def worker():
         try:
             today = date.today()
             if last_fresh != today:      # 每天刷一次快取，讓當日漲跌幅正確
+                cache_count = len(list(scan.CACHE_DIR.glob("*.csv")))
+                if cache_count < 500:
+                    print(f"[app] ⚠ 快取僅 {cache_count} 檔（期望 1900+）")
+                    print("[app] ⚠ 請先執行： python prefill_cache.py")
+                    print("[app] ⚠ 約 20 分鐘，完成後重啟 app 即可看到全市場 1900+ 支")
                 print("[app] 每日刷新快取中…")
                 n = scan.freshen_cache(rows)
                 print(f"[app] 快取已更新 {n} 檔")

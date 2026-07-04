@@ -79,6 +79,7 @@ git clone https://github.com/carsonchou/tw-stock-radar
 cd tw-stock-radar
 pip install -r requirements.txt
 cp .env.example .env
+python prefill_cache.py # first run only — downloads price history (~20 min, ~1900 stocks)
 python app.py           # → http://localhost:8899
 ```
 

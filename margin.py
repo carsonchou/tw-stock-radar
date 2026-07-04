@@ -38,9 +38,7 @@ from datetime import date, datetime, timedelta
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-QS = HERE.parent
-ROOT = QS.parent
-MARGIN_DIR = ROOT / "twdata" / "margin"
+MARGIN_DIR = HERE / "twdata" / "margin"
 
 sys.path.insert(0, str(HERE))
 try:

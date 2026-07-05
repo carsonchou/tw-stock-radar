@@ -860,10 +860,26 @@ def build_state(data: dict[str, pd.DataFrame], rows: list[tuple[str, str, str]],
         bull = round(sum(1 for s in members if s["above20"]) / len(members) * 100, 0)
         avg_score = round(sum(s["score"] for s in members) / len(members), 1)
         leader = max(members, key=lambda s: s["chg"])
+        signal_count = sum(1 for s in members if s.get("signal") == "long")
+        st_up_count = sum(1 for s in members if s.get("st") == "UP")
+        rsi_vals = [s["rsi"] for s in members if s.get("rsi") is not None]
+        avg_rsi = round(sum(rsi_vals) / len(rsi_vals), 1) if rsi_vals else None
+        inst_count = sum(1 for s in members if (s.get("consec_buy_days") or 0) >= 1)
+        top5 = sorted(members, key=lambda s: s["score"], reverse=True)[:5]
+        top_members = [
+            {"code": s["code"], "name": s.get("name", ""),
+             "score": s["score"], "chg": s["chg"],
+             "st": s.get("st"), "signal": s.get("signal"),
+             "consec": s.get("consec_buy_days") or 0}
+            for s in top5
+        ]
         sectors.append({
             "name": ind, "avg_chg": avg_chg, "bull_pct": bull,
             "score": avg_score, "count": len(members), "hue": industry_hue(ind),
             "leader": f"{leader['name']} {leader['chg']:+.1f}%",
+            "signal_count": signal_count, "st_up_count": st_up_count,
+            "avg_rsi": avg_rsi, "inst_count": inst_count,
+            "top_members": top_members,
         })
     sectors.sort(key=lambda s: s["score"], reverse=True)
 

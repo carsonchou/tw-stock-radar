@@ -447,6 +447,39 @@
   .tmlegend{display:flex;align-items:center;gap:14px;margin-top:10px;font-family:var(--mono);font-size:11px;color:var(--dim);flex-wrap:wrap}
   .tmlegend .lg{display:flex;align-items:center;gap:5px}
   .tmlegend .sw{width:22px;height:9px;border-radius:2px}
+  /* ════ heat tab controls + drill panel ════ */
+  .heat-controls{display:flex;align-items:center;gap:7px;margin-bottom:10px;flex-wrap:wrap}
+  .heat-lbl{font-size:11px;color:var(--dim);font-family:var(--mono)}
+  .hsort{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+    color:var(--dim);font-size:11px;padding:3px 10px;border-radius:3px;cursor:pointer;
+    font-family:var(--mono);transition:all .15s}
+  .hsort:hover{color:var(--txt);border-color:var(--acc2)}
+  .hsort.on{background:rgba(0,212,170,.12);border-color:var(--acc2);color:var(--acc2)}
+  .sector-drill{margin-top:12px;background:rgba(255,255,255,.03);
+    border:1px solid rgba(255,255,255,.08);border-radius:6px;padding:12px 16px}
+  .sd-hd{display:flex;align-items:flex-start;gap:14px;margin-bottom:10px;flex-wrap:wrap}
+  .sd-name{font-size:15px;font-weight:700;color:var(--txt);white-space:nowrap}
+  .sd-stats{display:flex;gap:14px;flex-wrap:wrap}
+  .sd-stat{display:flex;flex-direction:column;gap:2px}
+  .sd-stat-lbl{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--dim);font-family:var(--mono)}
+  .sd-stat-val{font-size:13px;font-weight:600;color:var(--txt)}
+  .sd-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:4px}
+  .sd-table th{font-size:10px;color:var(--dim);font-family:var(--mono);text-align:left;
+    padding:4px 8px;border-bottom:1px solid rgba(255,255,255,.06);text-transform:uppercase;white-space:nowrap}
+  .sd-table td{padding:5px 8px;border-bottom:1px solid rgba(255,255,255,.04)}
+  .sd-table tr:hover td{background:rgba(255,255,255,.03)}
+  .sd-code{color:var(--faint);font-family:var(--mono);cursor:pointer}
+  .sd-code:hover{color:var(--acc2)}
+  .sd-st-up{color:#00d478}.sd-st-dn{color:#ff6060}
+  .sd-sig{color:#00d478;font-family:var(--mono);font-size:10px}
+  .sd-sbar{display:inline-block;width:36px;height:3px;background:rgba(255,255,255,.1);
+    border-radius:2px;vertical-align:middle;margin-left:4px;position:relative;overflow:hidden}
+  .sd-sbar-fill{height:100%;border-radius:2px;background:var(--acc2)}
+  .tm-sigbadge{display:inline-block;padding:1px 5px;border-radius:2px;font-size:9px;
+    font-family:var(--mono);margin:1px}
+  .tm-sigbadge.buy{background:rgba(0,212,120,.15);color:#00d478;border:1px solid rgba(0,212,120,.25)}
+  .tm-sigbadge.st{background:rgba(0,180,255,.12);color:#00b4ff;border:1px solid rgba(0,180,255,.2)}
+  .tm-sigbadge.score{background:rgba(255,255,255,.07);color:rgba(255,255,255,.7)}
 
   /* ════ 法人資金流向 chips（三榜並列；買超紅／賣超綠，台股慣例） ════ */
   #chipsAsof{font-family:var(--mono);font-size:11px;color:var(--gold);font-weight:400;letter-spacing:0}
@@ -1084,12 +1117,22 @@
   <div class="view" data-view="heat">
     <section class="panel">
       <span class="corner tl"></span><span class="corner br"></span>
-      <h2>板塊資金流向 · SECTOR FLOW MAP　<span style="color:var(--faint);font-size:11px">面積＝家數 · 顏色＝漲跌</span></h2>
+      <h2>板塊資金流向 · SECTOR FLOW MAP　<span style="color:var(--faint);font-size:11px">面積＝家數 · 顏色＝漲跌 · 點板塊看成員</span></h2>
+      <div class="heat-controls">
+        <span class="heat-lbl">排序：</span>
+        <button class="hsort on" data-sk="score">強弱分</button>
+        <button class="hsort" data-sk="avg_chg">漲跌幅</button>
+        <button class="hsort" data-sk="bull_pct">站上MA%</button>
+        <button class="hsort" data-sk="signal_count">買訊家數</button>
+        <button class="hsort" data-sk="count">板塊大小</button>
+      </div>
       <div id="heatmap"></div>
+      <div id="sectorDrill" class="sector-drill" style="display:none"></div>
       <div class="tmlegend">
         <span class="lg"><span class="sw" style="background:linear-gradient(90deg,#7a1f2e,#ff4d6d)"></span>漲(紅,越深越強)</span>
         <span class="lg"><span class="sw" style="background:linear-gradient(90deg,#10402f,#28c08b)"></span>跌(綠,越深越弱)</span>
-        <span class="lg">點板塊看領頭/站上20MA</span>
+        <span class="lg" style="color:var(--acc2)">▲買訊 = ATR long signal</span>
+        <span class="lg" style="color:#00b4ff">ST↑ = SuperTrend 翻多</span>
       </div>
     </section>
   </div>
@@ -1708,19 +1751,91 @@ function tileColor(chg){
   if(chg<0)return `rgba(${Math.round(16+24*m)},${Math.round(64+128*m)},${Math.round(47+92*m)},.92)`;   // 暗綠→亮綠
   return 'rgba(80,95,120,.55)';
 }
+let _heatSortKey='score';
+let _heatSectors=null;
+function _heatScoreBadge(score){
+  if(score==null)return'';
+  const c=score>=60?'#00d478':score>=40?'#ffc832':'#ff6060';
+  return`<span class="tm-sigbadge score" style="color:${c}">分${score}</span>`;
+}
 function renderHeatmap(sectors){
   const box=$('#heatmap'); if(!box)return;
   if(!sectors||!sectors.length){box.innerHTML='<div class="empty" style="padding:40px">尚無板塊資料</div>';return;}
+  _heatSectors=sectors;
+  const sorted=[...sectors].sort((a,b)=>(b[_heatSortKey]||0)-(a[_heatSortKey]||0));
   const W=box.clientWidth||600,H=box.clientHeight||440;
-  const items=sectors.map(s=>({...s,value:Math.max(1,s.count||1)})).sort((a,b)=>b.value-a.value);
+  const items=sorted.map(s=>({...s,value:Math.max(1,s.count||1)}));
   const tiles=squarify(items,0,0,W,H);
   box.innerHTML=tiles.map(t=>{
-    const small=t.w<96||t.h<56;
-    return `<div class="tmtile" style="left:${t.x}px;top:${t.y}px;width:${t.w}px;height:${t.h}px;background:${tileColor(t.avg_chg)}">`+
-      `<div class="tmn">${t.name}</div>`+
-      (small?'':`<div class="tmsub">${t.count}檔 · 站上20MA ${t.bull_pct}% · 領頭 ${t.leader||'—'}</div>`)+
+    const small=t.w<90||t.h<50;
+    const medium=!small&&(t.w<160||t.h<80);
+    const sigBadge=(t.signal_count>0)?`<span class="tm-sigbadge buy">▲買訊${t.signal_count}</span>`:'';
+    const stBadge=(t.st_up_count>0)?`<span class="tm-sigbadge st">ST↑${t.st_up_count}</span>`:'';
+    const subLine=small?'':medium
+      ?`<div class="tmsub">${t.count}檔 · ${t.avg_chg>=0?'↑':'↓'}${Math.abs(t.avg_chg)}%</div>`
+      :`<div class="tmsub">${t.count}檔 · MA ${t.bull_pct}% · ${t.leader||'—'}</div>`+
+       `<div class="tmsub" style="display:flex;flex-wrap:wrap;gap:2px;margin-top:2px">${_heatScoreBadge(t.score)}${sigBadge}${stBadge}</div>`;
+    return`<div class="tmtile" data-ind="${t.name}" style="left:${t.x}px;top:${t.y}px;width:${t.w}px;height:${t.h}px;background:${tileColor(t.avg_chg)}">`+
+      `<div class="tmn">${t.name}</div>${subLine}`+
       `<div class="tmchg">${sign(t.avg_chg)}%</div></div>`;
   }).join('');
+  // 排序按鈕事件（每次重繪後重綁）
+  document.querySelectorAll('.hsort').forEach(btn=>{
+    btn.onclick=()=>{
+      document.querySelectorAll('.hsort').forEach(b=>b.classList.remove('on'));
+      btn.classList.add('on');
+      _heatSortKey=btn.dataset.sk;
+      renderHeatmap(_heatSectors);
+    };
+  });
+  // 點磚塊 → drill
+  box.querySelectorAll('.tmtile').forEach(tile=>{
+    tile.onclick=e=>{
+      e.stopPropagation();
+      const sec=(_heatSectors||[]).find(s=>s.name===tile.dataset.ind);
+      renderSectorDrill(sec);
+    };
+  });
+}
+function renderSectorDrill(sec){
+  const d=$('#sectorDrill');if(!d)return;
+  if(!sec){d.style.display='none';return;}
+  const members=sec.top_members||[];
+  const rows=members.map((m,i)=>{
+    const chgCol=m.chg>=0?'var(--up)':'var(--dn)';
+    const stCls=m.st==='UP'?'sd-st-up':'sd-st-dn';
+    const stTxt=m.st==='UP'?'↑多':m.st==='DN'?'↓空':'—';
+    const sigTxt=m.signal==='long'?'<span class="sd-sig">🎯 買訊</span>':m.consec>=1?`<span style="color:#00b4ff;font-size:10px">法人${m.consec}日</span>`:'';
+    const scoreW=Math.min(100,m.score||0);
+    const scoreC=m.score>=60?'#00d478':m.score>=40?'#ffc832':'#ff6060';
+    return`<tr><td style="color:var(--dim);text-align:center">${i+1}</td>`+
+      `<td class="sd-code" onclick="pick('${m.code}')">${m.code}</td>`+
+      `<td style="color:var(--txt)">${m.name}</td>`+
+      `<td><span style="color:${scoreC}">${m.score}</span><span class="sd-sbar"><span class="sd-sbar-fill" style="width:${scoreW}%;background:${scoreC}"></span></span></td>`+
+      `<td style="color:${chgCol}">${m.chg>=0?'+':''}${m.chg}%</td>`+
+      `<td class="${stCls}">${stTxt}</td>`+
+      `<td>${sigTxt}</td></tr>`;
+  }).join('');
+  const avgRsiTxt=sec.avg_rsi!=null?`<div class="sd-stat"><div class="sd-stat-lbl">均RSI</div><div class="sd-stat-val">${sec.avg_rsi}</div></div>`:'';
+  const instTxt=sec.inst_count>0?`<div class="sd-stat"><div class="sd-stat-lbl">法人連買</div><div class="sd-stat-val" style="color:#00b4ff">${sec.inst_count}檔</div></div>`:'';
+  const scoreCol=sec.score>=60?'#00d478':sec.score>=40?'#ffc832':'#ff6060';
+  d.style.display='block';
+  d.innerHTML=`<div class="sd-hd">`+
+    `<div class="sd-name">${sec.name}</div>`+
+    `<div class="sd-stats">`+
+      `<div class="sd-stat"><div class="sd-stat-lbl">家數</div><div class="sd-stat-val">${sec.count}</div></div>`+
+      `<div class="sd-stat"><div class="sd-stat-lbl">強弱分</div><div class="sd-stat-val" style="color:${scoreCol}">${sec.score}</div></div>`+
+      `<div class="sd-stat"><div class="sd-stat-lbl">平均漲跌</div><div class="sd-stat-val" style="color:${sec.avg_chg>=0?'var(--up)':'var(--dn)'}">${sec.avg_chg>=0?'+':''}${sec.avg_chg}%</div></div>`+
+      `<div class="sd-stat"><div class="sd-stat-lbl">站上MA</div><div class="sd-stat-val">${sec.bull_pct}%</div></div>`+
+      `<div class="sd-stat"><div class="sd-stat-lbl">買訊</div><div class="sd-stat-val" style="color:#00d478">${sec.signal_count||0}檔</div></div>`+
+      `<div class="sd-stat"><div class="sd-stat-lbl">ST翻多</div><div class="sd-stat-val" style="color:#00b4ff">${sec.st_up_count||0}檔</div></div>`+
+      avgRsiTxt+instTxt+
+    `</div></div>`+
+    `<div style="font-size:11px;color:var(--dim);margin-bottom:6px">Top 5 強勢成員（點代號開深度頁）</div>`+
+    `<table class="sd-table">`+
+      `<thead><tr><th>#</th><th>代號</th><th>名稱</th><th>強弱分</th><th>漲跌</th><th>趨勢</th><th>訊號</th></tr></thead>`+
+      `<tbody>${rows}</tbody>`+
+    `</table>`;
 }
 
 // ── #1 實盤戰績成績單 ──
@@ -1877,10 +1992,16 @@ async function load(){
       // 0 軸雙向：漲往右紅、跌往左綠，半幅最大 50%，一眼判方向
       const w=Math.max(3,Math.abs(s.avg_chg)/sm*50);
       const col=dirHex(s.avg_chg), dir=s.avg_chg>=0?'pos':'neg';
+      const scoreCol=(s.score||0)>=60?'#00d478':(s.score||0)>=40?'#ffc832':'#ff6060';
+      const sigBadge=(s.signal_count>0)?`<span class="chip" style="color:#00d478">▲買${s.signal_count}</span>`:'';
+      const stBadge=(s.st_up_count>0)?`<span class="chip" style="color:#00b4ff">ST↑${s.st_up_count}</span>`:'';
       return `<div class="sector"><div class="sname">${s.name}</div>`+
         `<div class="sbar"><div class="sfill ${dir}" style="width:${w}%;background:${col}"></div></div>`+
         `<div class="schg" style="color:${chgColor(s.avg_chg)}">${sign(s.avg_chg)}%</div>`+
-        `<div class="sleader">領漲 <b style="color:var(--txt)">${s.leader}</b><span class="chip">站上20MA ${s.bull_pct}%</span></div></div>`;
+        `<div class="sleader">領漲 <b style="color:var(--txt)">${s.leader}</b>`+
+        `<span class="chip">MA ${s.bull_pct}%</span>`+
+        `<span class="chip" style="color:${scoreCol}">分${s.score}</span>`+
+        `${sigBadge}${stBadge}</div></div>`;
     }).join('');
 
     drillMap.clear();
